@@ -12,6 +12,6 @@
 
 ## 效果图
 
-![1] (./images/1.png)
+![1](./images/1.png)
 
-![2] (./images/3.gif)
+![2](./images/3.gif)
