@@ -392,7 +392,7 @@ private:
                 outputText_(optionTexts_[i], foregroundColor_, backgroundColor_);
             }
 
-            if (maxColumn_ == 0 || i % maxColumn_ == maxColumn_ - 1)
+            if (maxColumn_ == 0 || i % maxColumn_ == maxColumn_ - 1 || i == optionTexts_.size() - 1)
                 std::cout << std::endl;
             else
                 std::cout << '\t';
