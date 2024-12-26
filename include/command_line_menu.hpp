@@ -227,6 +227,7 @@ public:
     // @brief Output all options to console.
     void show()
     {
+        clearConsole();
         update_();
     }
 
