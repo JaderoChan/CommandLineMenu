@@ -1,4 +1,4 @@
-# Command Line Option
+# Command Line Menu
 
 一个简单的控制台界面，用于快速地做出一个比较人性化的控制台应用（菜单，选择不同功能）
 
@@ -15,9 +15,3 @@
 ![1](./images/1.png)
 
 ![2](./images/3.gif)
-
-## 注意
-
-在某些情况下，使用ASCII转义控制字符无法清空控制台，可以改写CommandLineOption类中的clearConsole函数以支持不同平台。
-
-*例如在Windows平台改用system("cls");*
