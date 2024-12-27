@@ -175,6 +175,7 @@ public:
 
     // @brief Set the row separator.
     // (default is '-', and value '\0' indicating no separator)
+    // @note If the option text width is 0, the row separator will not be output.
     void setRowSeparator(char separator) { rowSeparator_ = separator; }
 
     // @brief Set the alignment of the option text.
@@ -205,7 +206,7 @@ public:
 
     // @brief Set the justified width of the option text.
     // @note Default value is 0.
-    // @note The value 0 indicates that do not justify the text.
+    // @note The value 0 indicates that do not justify the text, and the row separator will not be output.
     void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
 
     // @brief Set the current selected option (highlight option).
@@ -486,10 +487,10 @@ private:
 
         // Calculate the width of each row, based on the max column and option text width.
         // And attention, that conatins all column separator.
-        size_t rowWidth = (optionTextWidth_ + 1) * maxColumn_ + 1;
+        size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxColumn_ + 1;
 
         // Output the row separator at top first, if #rowSeparator_ is not '\0'.
-        if (rowSeparator_ != '\0')
+        if (rowSeparator_ != '\0' && optionTextWidth_ != 0)
             std::cout << std::string(rowWidth, rowSeparator_) << std::endl;
 
         for (size_t i = 0; i < options_.size(); ++i) {
@@ -522,7 +523,7 @@ private:
                 // First, output the column separator for the last one in the row or the last one in the option list.
                 std::cout << columnSeparator_;
 
-                if (rowSeparator_ == '\0') {
+                if (rowSeparator_ == '\0' || optionTextWidth_ == 0) {
                     std::cout << std::endl;
                 } else {
                     if (posInRow != maxColumn_ - 1) {
@@ -595,7 +596,7 @@ private:
     size_t maxColumn_                           = 1;
     // The justified width of option text, used to align the output.
     // Default value is 0.
-    // The value 0 indicates that do not justify the text.
+    // The value 0 indicates that do not justify the text, and the row separator will not be output.
     size_t optionTextWidth_                     = 0;
     // Current selected option index.
     size_t selectedOption_                      = 0;
