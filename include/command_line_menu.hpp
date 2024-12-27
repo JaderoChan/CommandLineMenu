@@ -305,31 +305,37 @@ public:
                 update_();
             } else if (key == escKey_) {
                 shouldEndReceiveInput_ = true;
-            } else if (key == directionalControlKey_[0]) {
+            } else if (key == directionalControlKey_[0]) {  // Left
                 if (selectedOption_ > 0) {
                     selectOption(selectedOption_ - 1);
                     update_();
                 }
-            } else if (key == directionalControlKey_[1]) {
+            } else if (key == directionalControlKey_[1]) {  // Up
                 size_t currentRow = selectedOption_ / maxColumn_;
                 if (currentRow > 0) {
                     selectOption(selectedOption_ - maxColumn_);
                     update_();
                 }
-            } else if (key == directionalControlKey_[2]) {
-                if (selectedOption_ < options_.size() - 1) {
-                    selectOption(selectedOption_ + 1);
-                    update_();
-                }
-            } else if (key == directionalControlKey_[3]) {
-                size_t currentRow = selectedOption_ / maxColumn_;
-                if (currentRow < options_.size() / maxColumn_) {
-                    size_t expectedPos = selectedOption_ + maxColumn_;
-                    expectedPos = expectedPos < options_.size() ? expectedPos : options_.size() - 1;
-
-                    if (expectedPos != selectedOption_) {
-                        selectOption(expectedPos);
+            } else if (key == directionalControlKey_[2]) {  // Right
+                if (!options_.empty()) {
+                    if (selectedOption_ < options_.size() - 1) {
+                        selectOption(selectedOption_ + 1);
                         update_();
+                    }
+                }
+            } else if (key == directionalControlKey_[3]) {  // Down
+                if (!options_.empty()) {
+                    size_t currentRow = selectedOption_ / maxColumn_;
+                    size_t sumRow = (options_.size() - 1) / maxColumn_ + 1;
+
+                    if (currentRow < sumRow - 1) {
+                        size_t expectedPos = selectedOption_ + maxColumn_;
+                        expectedPos = expectedPos < options_.size() ? expectedPos : options_.size() - 1;
+
+                        if (expectedPos != selectedOption_) {
+                            selectOption(expectedPos);
+                            update_();
+                        }
                     }
                 }
             }
