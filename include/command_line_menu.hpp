@@ -206,7 +206,13 @@ public:
     void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
 
     // @brief Set the current selected option (highlight option).
-    void setHighlightedOption(size_t index) { selectedOption_ = index; }
+    void setHighlightedOption(size_t index)
+    {
+        if (index >= options_.size())
+            setHighlightedOption(options_.size() - 1);
+        else
+            selectedOption_ = index;
+    }
 
     // @brief Select the specified option, the same as setHighlightedOption().
     void selectOption(size_t index) { setHighlightedOption(index); }
