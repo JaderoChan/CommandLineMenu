@@ -59,6 +59,9 @@ public:
     void addOption(const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, callbackFunc });
+
+        if (enableAutoAdjustOptionTextWidth_ && optionText.size() > optionTextWidth_)
+            optionTextWidth_ = optionText.size();
     }
 
     // overload
@@ -70,6 +73,9 @@ public:
     void addOption(const std::string& optionText, ArgFunc callbackFunc, Arg arg, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
+
+        if (enableAutoAdjustOptionTextWidth_ && optionText.size() > optionTextWidth_)
+            optionTextWidth_ = optionText.size();
     }
 
     // @brief Insert a new option to the specified position.
@@ -80,6 +86,9 @@ public:
     void insertOption(size_t index, const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.insert(options_.begin() + index, Option { enableNewPage, optionText, callbackFunc });
+
+        if (enableAutoAdjustOptionTextWidth_ && optionText.size() > optionTextWidth_)
+            optionTextWidth_ = optionText.size();
     }
 
     // @brief Insert a new option to the specified position.
@@ -93,19 +102,34 @@ public:
     {
         options_.insert(options_.begin() + index,
                         Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
+
+        if (enableAutoAdjustOptionTextWidth_ && optionText.size() > optionTextWidth_)
+            optionTextWidth_ = optionText.size();
     }
 
     // @brief Remove an option by its index.
     void removeOption(size_t index) { options_.erase(options_.begin() + index); }
 
     // @brief Remove all options.
-    void removeAllOption() { options_.clear(); }
+    void removeAllOption()
+    {
+        options_.clear();
+
+        if (enableAutoAdjustOptionTextWidth_)
+            optionTextWidth_ = 0;
+    }
 
     // @brief Set the whether go to the new page when the option be triggered.
     void setOptionEnableNewPage(size_t index, bool enable) { options_[index].enableNewPage = enable; }
 
     // @brief Set the text of specified option.
-    void setOptionText(size_t index, const std::string& text) { options_[index].text = text; }
+    void setOptionText(size_t index, const std::string& text)
+    {
+        options_[index].text = text;
+
+        if (enableAutoAdjustOptionTextWidth_ && text.size() > optionTextWidth_)
+            optionTextWidth_ = text.size();
+    }
 
     // @brief Set the callback function of specified option.
     void setOptionCallback(size_t index, VoidFunc callbackFunc)
@@ -139,6 +163,25 @@ public:
     // @brief Set whether to show the title (option text) of each option page.
     void setEnableShowOptionPageTitle(bool enable) { enableShowOptionPageTitle_ = enable; }
 
+    // @brief Set whether to adjust the option text width based on the the longest option text automatically.
+    void setEnableAutoAdjustOptionTextWidth(bool enable) { enableAutoAdjustOptionTextWidth_ = enable; }
+
+    // @brief Set the column separator.
+    // (default is '\t')
+    void setColumnSeparator(char separator) { columnSeparator_ = separator; }
+
+    // @brief Set the row separator.
+    // (default is '\0' indicating no separator)
+    void setRowSeparator(char separator) { rowSeparator_ = separator; }
+
+    // @brief Set the alignment of the option text.
+    // @note Default value is 0.
+    // @note The value 0 indicates that do left justified.
+    // @note The value 1 indicates that do right justified.
+    // @note The value 2 indicates that do center justified.
+    // (based on the current option text length and the OptionTextWidth)
+    void setOptionTextAlignment(int alignment) { optionTextAlignment_ = alignment; }
+
     // @brief Set the enter key, used to trigger the selected option.
     void setEnterKey(int key) { enterKey_ = key; }
 
@@ -157,6 +200,11 @@ public:
     // @brief Set the max column of option menu, used to align the output.
     void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
 
+    // @brief Set the justified width of the option text.
+    // @note Default value is 0.
+    // @note The value 0 indicates that do not justify the text.
+    void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
+
     // @brief Set the current selected option (highlight option).
     void setHighlightedOption(size_t index) { selectedOption_ = index; }
 
@@ -174,14 +222,6 @@ public:
 
     // @brief Set the highlight foreground color of option selected.
     void setHighlightForegroundColor(int r, int g, int b) { highlightForegroundColor_ = { r, g, b }; }
-
-    // @brief Set the column separator, used to separate the columns of options.
-    // (default is '\t')
-    void setColumnSeparator(const std::string& separator) { columnSeparator_ = separator; }
-
-    // @brief Set the row separator, used to separate the rows of options.
-    // (default is empty string indicating no separator)
-    void setRowSeparator(const std::string& separator) { rowSeparator_ = separator; }
 
     // @brief Set the top text of the option list.
     void setTopText(const std::string& text) { topText_ = text; }
@@ -364,6 +404,31 @@ private:
 
     CommandLineMenu& operator=(const CommandLineMenu&) = delete;
 
+    static std::string cutoffString(const std::string& str, size_t width)
+    {
+        if (str.size() <= width)
+            return str;
+        else
+            return str.substr(0, width - 3) + "...";
+    }
+
+    static std::string justifyString(const std::string& str, size_t width, int alignment)
+    {
+        if (str.size() > width)
+            return justifyString(cutoffString(str, width), width, alignment);
+
+        switch (alignment) {
+            case 0:
+                return str;
+            case 1:
+                return std::string(width - str.size(), ' ') + str;
+            case 2:
+                return std::string((width - str.size()) / 2, ' ') + str + std::string((width - str.size()) / 2, ' ');
+            default:
+                return str;
+        }
+    }
+
     bool isVaildColor_(int r, int g, int b) const
     {
         return (r >= 0 && r <= 255) && (g >= 0 && g <= 255) && (b >= 0 && b <= 255);
@@ -406,20 +471,36 @@ private:
             std::cout << topText_ << '\n' << std::endl;
 
         for (size_t i = 0; i < options_.size(); ++i) {
+            std::string text;
+
             if (enableShowIndex_)
-                std::cout << "[" << i << "] ";
+                text += "[" + std::to_string(i) + "] ";
+
+            text += options_[i].text;
+
+            if (optionTextWidth_ > 0)
+                 text = justifyString(text, optionTextWidth_, optionTextAlignment_);
 
             if (i == selectedOption_) {
-                outputText_(options_[i].text, highlightForegroundColor_, highlightBackgroundColor_);
+                outputText_(text, highlightForegroundColor_, highlightBackgroundColor_);
             } else {
-                outputText_(options_[i].text, foregroundColor_, backgroundColor_);
+                outputText_(text, foregroundColor_, backgroundColor_);
             }
 
             if (maxColumn_ == 0 || i % maxColumn_ == maxColumn_ - 1 || i == options_.size() - 1) {
-                if (rowSeparator_.empty())
+                if (rowSeparator_ == '\0') {
                     std::cout << std::endl;
-                else
-                    std::cout << '\n' << rowSeparator_ << std::endl;
+                } else {
+                    std::cout << std::endl;
+
+                    std::string separator(optionTextWidth_ * maxColumn_, rowSeparator_);
+                    for (size_t i = 0; i < maxColumn_; ++i) {
+                        if (i == 0 || i == maxColumn_ - 1)
+                            continue;
+
+                        separator[i * optionTextWidth_] = columnSeparator_;
+                    }
+                }
             } else {
                 std::cout << columnSeparator_;
             }
@@ -435,6 +516,18 @@ private:
     bool enableShowIndex_                       = false;
     // Whether to show the title (option text) at top of option page.
     bool enableShowOptionPageTitle_             = false;
+    bool enableAutoAdjustOptionTextWidth_       = false;
+    // Separator of each column. (default is '\t')
+    char columnSeparator_                       = '\t';
+    // Separator of each row. (default is '\0' indicating no separator)
+    char rowSeparator_                          = '\0';
+    // The alignment of option text, used to align the output.
+    // Default value is 0.
+    // The value 0 indicates that do left justified.
+    // The value 1 indicates that do right justified.
+    // The value 2 indicates that do center justified.
+    // (based on the current option text length and the OptionTextWidth)
+    int optionTextAlignment_                    = 0;
     // Enter key, used to trigger the option.
     int enterKey_                               = 0x0D;
     // Esc key, used to return to the main menu or exit the input loop.
@@ -445,6 +538,10 @@ private:
     // The max column of option list, used to align the output.
     // Default value is 1, and value 0 is same to value 1.
     size_t maxColumn_                           = 1;
+    // The justified width of option text, used to align the output.
+    // Default value is 0.
+    // The value 0 indicates that do not justify the text.
+    size_t optionTextWidth_                     = 0;
     // Current selected option index.
     size_t selectedOption_                      = 0;
     // Default colir is invaid, indicating that do not set color.
@@ -452,10 +549,6 @@ private:
     Rgb foregroundColor_                        = { -1, -1, -1 };
     Rgb highlightBackgroundColor_               = { -1, -1, -1 };
     Rgb highlightForegroundColor_               = { 0, 255, 0 };
-    // Separator of each column. (default is \t)
-    std::string columnSeparator_                = "\t";
-    // Separator of each row. (default is empty string indicating no separator)
-    std::string rowSeparator_                   = "";
     std::string topText_;
     std::string bottomText_;
     std::string newPageEndedText_;
