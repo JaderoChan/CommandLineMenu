@@ -50,58 +50,9 @@ public:
 
     ~CommandLineMenu() = default;
 
-    CommandLineMenu(const CommandLineMenu& other) :
-        enableShowIndex_(other.enableShowIndex_),
-        enableShowOptionPageTitle_(other.enableShowOptionPageTitle_),
-        enableAutoAdjustOptionTextWidth_(other.enableAutoAdjustOptionTextWidth_),
-        columnSeparator_(other.columnSeparator_),
-        rowSeparator_(other.rowSeparator_),
-        optionTextAlignment_(other.optionTextAlignment_),
-        enterKey_(other.enterKey_),
-        escKey_(other.escKey_),
-        directionalControlKey_(other.directionalControlKey_),
-        maxColumn_(other.maxColumn_),
-        optionTextWidth_(other.optionTextWidth_),
-        backgroundColor_(other.backgroundColor_),
-        foregroundColor_(other.foregroundColor_),
-        highlightBackgroundColor_(other.highlightBackgroundColor_),
-        highlightForegroundColor_(other.highlightForegroundColor_),
-        topText_(other.topText_),
-        bottomText_(other.bottomText_),
-        newPageEndedText_(other.newPageEndedText_),
-        options_(other.options_),
-        shouldEndReceiveInput_(false)
-    {}
+    CommandLineMenu(const CommandLineMenu& other) = delete;
 
-    CommandLineMenu& operator=(const CommandLineMenu& other)
-    {
-        if (this == &other)
-            return *this;
-
-        enableShowIndex_ = other.enableShowIndex_;
-        enableShowOptionPageTitle_ = other.enableShowOptionPageTitle_;
-        enableAutoAdjustOptionTextWidth_ = other.enableAutoAdjustOptionTextWidth_;
-        columnSeparator_ = other.columnSeparator_;
-        rowSeparator_ = other.rowSeparator_;
-        optionTextAlignment_ = other.optionTextAlignment_;
-        enterKey_ = other.enterKey_;
-        escKey_ = other.escKey_;
-        directionalControlKey_ = other.directionalControlKey_;
-        maxColumn_ = other.maxColumn_;
-        optionTextWidth_ = other.optionTextWidth_;
-        selectedOption_ = 0;
-        backgroundColor_ = other.backgroundColor_;
-        foregroundColor_ = other.foregroundColor_;
-        highlightBackgroundColor_ = other.highlightBackgroundColor_;
-        highlightForegroundColor_ = other.highlightForegroundColor_;
-        topText_ = other.topText_;
-        bottomText_ = other.bottomText_;
-        newPageEndedText_ = other.newPageEndedText_;
-        options_ = other.options_;
-        shouldEndReceiveInput_ = false;
-
-        return *this;
-    }
+    CommandLineMenu& operator=(const CommandLineMenu& other) = delete;
 
     // @brief Add a new option to the last position.
     // @param optionText        The text of the option.
