@@ -46,10 +46,61 @@ public:
     using Arg           = void*;
     using ArgFunc       = void (*)(Arg);
 
-    static CommandLineMenu& getInstance()
+    CommandLineMenu() : shouldEndReceiveInput_(false) {};
+
+    ~CommandLineMenu() = default;
+
+    CommandLineMenu(const CommandLineMenu& other) :
+        enableShowIndex_(other.enableShowIndex_),
+        enableShowOptionPageTitle_(other.enableShowOptionPageTitle_),
+        enableAutoAdjustOptionTextWidth_(other.enableAutoAdjustOptionTextWidth_),
+        columnSeparator_(other.columnSeparator_),
+        rowSeparator_(other.rowSeparator_),
+        optionTextAlignment_(other.optionTextAlignment_),
+        enterKey_(other.enterKey_),
+        escKey_(other.escKey_),
+        directionalControlKey_(other.directionalControlKey_),
+        maxColumn_(other.maxColumn_),
+        optionTextWidth_(other.optionTextWidth_),
+        backgroundColor_(other.backgroundColor_),
+        foregroundColor_(other.foregroundColor_),
+        highlightBackgroundColor_(other.highlightBackgroundColor_),
+        highlightForegroundColor_(other.highlightForegroundColor_),
+        topText_(other.topText_),
+        bottomText_(other.bottomText_),
+        newPageEndedText_(other.newPageEndedText_),
+        options_(other.options_),
+        shouldEndReceiveInput_(false)
+    {}
+
+    CommandLineMenu& operator=(const CommandLineMenu& other)
     {
-        static CommandLineMenu instance;
-        return instance;
+        if (this == &other)
+            return *this;
+
+        enableShowIndex_ = other.enableShowIndex_;
+        enableShowOptionPageTitle_ = other.enableShowOptionPageTitle_;
+        enableAutoAdjustOptionTextWidth_ = other.enableAutoAdjustOptionTextWidth_;
+        columnSeparator_ = other.columnSeparator_;
+        rowSeparator_ = other.rowSeparator_;
+        optionTextAlignment_ = other.optionTextAlignment_;
+        enterKey_ = other.enterKey_;
+        escKey_ = other.escKey_;
+        directionalControlKey_ = other.directionalControlKey_;
+        maxColumn_ = other.maxColumn_;
+        optionTextWidth_ = other.optionTextWidth_;
+        selectedOption_ = 0;
+        backgroundColor_ = other.backgroundColor_;
+        foregroundColor_ = other.foregroundColor_;
+        highlightBackgroundColor_ = other.highlightBackgroundColor_;
+        highlightForegroundColor_ = other.highlightForegroundColor_;
+        topText_ = other.topText_;
+        bottomText_ = other.bottomText_;
+        newPageEndedText_ = other.newPageEndedText_;
+        options_ = other.options_;
+        shouldEndReceiveInput_ = false;
+
+        return *this;
     }
 
     // @brief Add a new option to the last position.
@@ -410,12 +461,6 @@ private:
         CallbackFunc callback;
     };
 
-    CommandLineMenu() : shouldEndReceiveInput_(false) {};
-
-    CommandLineMenu(const CommandLineMenu&) = delete;
-
-    CommandLineMenu& operator=(const CommandLineMenu&) = delete;
-
     static std::string cutoffString(const std::string& str, size_t width)
     {
         if (str.size() <= width)
@@ -528,6 +573,7 @@ private:
     bool enableShowIndex_                       = false;
     // Whether to show the title (option text) at top of option page.
     bool enableShowOptionPageTitle_             = false;
+    // Whether to adjust the option text width based on the the longest option text automatically.
     bool enableAutoAdjustOptionTextWidth_       = false;
     // Separator of each column. (default is '\t')
     char columnSeparator_                       = '\t';
