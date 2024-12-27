@@ -139,15 +139,6 @@ public:
     // @brief Set whether to show the title (option text) of each option page.
     void setEnableShowOptionPageTitle(bool enable) { enableShowOptionPageTitle_ = enable; }
 
-    // @brief Set the max column of option menu, used to align the output.
-    void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
-
-    // @brief Set the current selected option (highlight option).
-    void setHighlightedOption(size_t index) { selectedOption_ = index; }
-
-    // @brief Select the specified option, the same as setHighlightedOption().
-    void selectOption(size_t index) { setHighlightedOption(index); }
-
     // @brief Set the enter key, used to trigger the selected option.
     void setEnterKey(int key) { enterKey_ = key; }
 
@@ -163,6 +154,15 @@ public:
     // @overload
     void setDirectionalControlKey(const std::array<int, 4>& keys) { directionalControlKey_ = keys; }
 
+    // @brief Set the max column of option menu, used to align the output.
+    void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
+
+    // @brief Set the current selected option (highlight option).
+    void setHighlightedOption(size_t index) { selectedOption_ = index; }
+
+    // @brief Select the specified option, the same as setHighlightedOption().
+    void selectOption(size_t index) { setHighlightedOption(index); }
+
     // @brief Set the background color of the option text.
     void setBackgroundColor(int r, int g, int b) { backgroundColor_ = { r, g, b }; }
 
@@ -174,6 +174,14 @@ public:
 
     // @brief Set the highlight foreground color of option selected.
     void setHighlightForegroundColor(int r, int g, int b) { highlightForegroundColor_ = { r, g, b }; }
+
+    // @brief Set the column separator, used to separate the columns of options.
+    // (default is '\t')
+    void setColumnSeparator(const std::string& separator) { columnSeparator_ = separator; }
+
+    // @brief Set the row separator, used to separate the rows of options.
+    // (default is empty string indicating no separator)
+    void setRowSeparator(const std::string& separator) { rowSeparator_ = separator; }
 
     // @brief Set the top text of the option list.
     void setTopText(const std::string& text) { topText_ = text; }
@@ -401,10 +409,14 @@ private:
                 outputText_(options_[i].text, foregroundColor_, backgroundColor_);
             }
 
-            if (maxColumn_ == 0 || i % maxColumn_ == maxColumn_ - 1 || i == options_.size() - 1)
-                std::cout << std::endl;
-            else
-                std::cout << '\t';
+            if (maxColumn_ == 0 || i % maxColumn_ == maxColumn_ - 1 || i == options_.size() - 1) {
+                if (rowSeparator_.empty())
+                    std::cout << std::endl;
+                else
+                    std::cout << '\n' << rowSeparator_ << std::endl;
+            } else {
+                std::cout << columnSeparator_;
+            }
         }
 
         if (!bottomText_.empty())
@@ -417,11 +429,6 @@ private:
     bool enableShowIndex_                       = false;
     // Whether to show the title (option text) at top of option page.
     bool enableShowOptionPageTitle_             = false;
-    // The max column of option list, used to align the output.
-    // Default value is 1, and value 0 is same to value 1.
-    size_t maxColumn_                           = 1;
-    // Current selected option index.
-    size_t selectedOption_                      = 0;
     // Enter key, used to trigger the option.
     int enterKey_                               = 0x0D;
     // Esc key, used to return to the main menu or exit the input loop.
@@ -429,11 +436,20 @@ private:
     // Directional control key, used to select option.
     // Left, Up, Right, Down
     std::array<int, 4> directionalControlKey_   = { 'a', 'w', 'd', 's' };
+    // The max column of option list, used to align the output.
+    // Default value is 1, and value 0 is same to value 1.
+    size_t maxColumn_                           = 1;
+    // Current selected option index.
+    size_t selectedOption_                      = 0;
     // Default colir is invaid, indicating that do not set color.
     Rgb backgroundColor_                        = { -1, -1, -1 };
     Rgb foregroundColor_                        = { -1, -1, -1 };
     Rgb highlightBackgroundColor_               = { -1, -1, -1 };
     Rgb highlightForegroundColor_               = { 0, 255, 0 };
+    // Separator of each column. (default is \t)
+    std::string columnSeparator_                = "\t";
+    // Separator of each row. (default is empty string indicating no separator)
+    std::string rowSeparator_                   = "";
     std::string topText_;
     std::string bottomText_;
     std::string newPageEndedText_;
