@@ -34,6 +34,7 @@
 #include <string>       // string
 #include <array>        // array
 #include <vector>       // vector
+#include <atomic>       // atomic
 #include <iostream>     // cout, endl, flush, getchar()
 #include <stdexcept>    // runtime_error
 
@@ -51,46 +52,47 @@ public:
         return instance;
     }
 
-    // @brief Add a new option to back.
+    // @brief Add a new option to the last position.
     // @param optionText        The text of the option.
     // @param callbackFunc      The callback function when the option is triggered.
-    // @param isNewPage         Whether go to the new page when the option be triggered.
-    void addOption(const std::string& optionText, VoidFunc callbackFunc, bool isNewPage = true)
+    // @param enableNewPage     Whether go to the new page when the option be triggered.
+    void addOption(const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
-        options_.push_back(Option { isNewPage, optionText, callbackFunc });
+        options_.push_back(Option { enableNewPage, optionText, callbackFunc });
     }
 
     // overload
-    // @brief Add a new option with argument to back.
+    // @brief Add a new option to the last position.
     // @param optionText        The text of the option.
     // @param callbackFunc      The callback function when the option is triggered.
     // @param arg               The argument of the callback function.
-    // @param isNewPage         Whether go to the new page when the option be triggered.
-    void addOption(const std::string& optionText, ArgFunc callbackFunc, Arg arg, bool isNewPage = true)
+    // @param enableNewPage     Whether go to the new page when the option be triggered.
+    void addOption(const std::string& optionText, ArgFunc callbackFunc, Arg arg, bool enableNewPage = true)
     {
-        options_.push_back(Option { isNewPage, optionText, CallbackFunc(callbackFunc, arg) });
+        options_.push_back(Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
     }
 
     // @brief Insert a new option to the specified position.
     // @param index             The position to insert the option.
     // @param optionText        The text of the option.
     // @param callbackFunc      The callback function when the option is triggered.
-    // @param isNewPage         Whether go to the new page when the option be triggered.
-    void insertOption(size_t index, const std::string& optionText, VoidFunc callbackFunc, bool isNewPage = true)
+    // @param enableNewPage     Whether go to the new page when the option be triggered.
+    void insertOption(size_t index, const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
-        options_.insert(options_.begin() + index, Option { isNewPage, optionText, callbackFunc });
+        options_.insert(options_.begin() + index, Option { enableNewPage, optionText, callbackFunc });
     }
 
-    // @brief Insert a new option with argument to the specified position.
+    // @brief Insert a new option to the specified position.
     // @param index             The position to insert the option.
     // @param optionText        The text of the option.
     // @param callbackFunc      The callback function when the option is triggered.
     // @param arg               The argument of the callback function.
-    // @param isNewPage         Whether go to the new page when the option be triggered.
+    // @param enableNewPage     Whether go to the new page when the option be triggered.
     void insertOption(size_t index, const std::string& optionText, ArgFunc callbackFunc, Arg arg,
-                      bool isNewPage = true)
+                      bool enableNewPage = true)
     {
-        options_.insert(options_.begin() + index, Option { isNewPage, optionText, CallbackFunc(callbackFunc, arg) });
+        options_.insert(options_.begin() + index,
+                        Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
     }
 
     // @brief Remove an option by its index.
@@ -99,11 +101,11 @@ public:
     // @brief Remove all options.
     void removeAllOption() { options_.clear(); }
 
-    // @brief Set the whether go to the new page when the option be triggered. (default is false)
-    void setOptionIsNewPage(size_t index, bool isNewPage) { options_[index].isNewPage = isNewPage; }
+    // @brief Set the whether go to the new page when the option be triggered.
+    void setOptionEnableNewPage(size_t index, bool enable) { options_[index].enableNewPage = enable; }
 
     // @brief Set the text of specified option.
-    void setOptionText(size_t index, const std::string& optionText) { options_[index].text = optionText; }
+    void setOptionText(size_t index, const std::string& text) { options_[index].text = text; }
 
     // @brief Set the callback function of specified option.
     void setOptionCallback(size_t index, VoidFunc callbackFunc)
@@ -132,12 +134,12 @@ public:
     size_t optionCount() const { return options_.size(); }
 
     // @brief Set whether to show the index of each option.
-    void setIsShowIndex(bool show) { isShowIndex_ = show; }
+    void setEnableShowIndex(bool enable) { enableShowIndex_ = enable; }
 
     // @brief Set whether to show the title (option text) of each option page.
-    void setIsShowOptionPageTitle(bool show) { isShowOptionPageTitle = show; }
+    void setEnableShowOptionPageTitle(bool enable) { enableShowOptionPageTitle_ = enable; }
 
-    // @brief Set the max column of option list, used to align the output.
+    // @brief Set the max column of option menu, used to align the output.
     void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
 
     // @brief Set the current selected option (highlight option).
@@ -158,6 +160,9 @@ public:
         directionalControlKey_ = { left, up, right, down };
     }
 
+    // @overload
+    void setDirectionalControlKey(const std::array<int, 4>& keys) { directionalControlKey_ = keys; }
+
     // @brief Set the background color of the option text.
     void setBackgroundColor(int r, int g, int b) { backgroundColor_ = { r, g, b }; }
 
@@ -171,14 +176,14 @@ public:
     void setHighlightForegroundColor(int r, int g, int b) { highlightForegroundColor_ = { r, g, b }; }
 
     // @brief Set the top text of the option list.
-    void setTopText(const std::string& topText) { topText_ = topText; }
+    void setTopText(const std::string& text) { topText_ = text; }
 
     // @brief Set the bottom text of the option list.
-    void setBottomText(const std::string& bottomText) { bottomText_ = bottomText; }
+    void setBottomText(const std::string& text) { bottomText_ = text; }
 
-    // @brief Set the text be displayed when the option page ended,
-    // example you can set "Press ESC key to return to the main menu."
-    void setOptionEndedText(const std::string& optionEndedText) { optionEndedText_ = optionEndedText; }
+    // @brief Set the text be displayed when the option page ended.
+    // Example you can set "Press ESC key to back to the main menu."
+    void setNewPageEndedText(const std::string& text) { newPageEndedText_ = text; }
 
     // @brief Select and trigger the specified option.
     // @note Not throw exception even if the index is out of range or the option's callback function is null.
@@ -192,11 +197,11 @@ public:
         if (!options_[index].callback.isValid())
             return;
 
-        if (options_[index].isNewPage) {
+        if (options_[index].enableNewPage) {
             clearConsole();
 
-            if (isShowOptionPageTitle) {
-                if (isShowIndex_)
+            if (enableShowOptionPageTitle_) {
+                if (enableShowIndex_)
                     std::cout << "[" << selectedOption_ << "] ";
 
                 std::cout << options_[selectedOption_].text << '\n' << std::endl;
@@ -205,8 +210,8 @@ public:
 
         options_[selectedOption_].callback.execute();
 
-        if (!optionEndedText_.empty())
-            std::cout << '\n' << optionEndedText_ << std::endl;
+        if (!newPageEndedText_.empty())
+            std::cout << '\n' << newPageEndedText_ << std::endl;
 
         while (::_getch() != escKey_)
             continue;
@@ -233,11 +238,9 @@ public:
 
     // @brief Start to recving input from console.
     // @note This function will block the current thread, and will not return until the input loop is exited.
-    void startRecvingInput()
+    void startReceiveInput()
     {
-        bool shouldEndRecvingInput = false;
-
-        while (!shouldEndRecvingInput) {
+        while (!shouldEndReceiveInput_) {
             // Clear the input buffer.
             std::cin.clear();
 
@@ -247,7 +250,7 @@ public:
                 triggerOption(selectedOption_);
                 update_();
             } else if (key == escKey_) {
-                shouldEndRecvingInput = true;
+                shouldEndReceiveInput_ = true;
             } else if (key == directionalControlKey_[0]) {
                 if (selectedOption_ > 0) {
                     selectOption(selectedOption_ - 1);
@@ -278,6 +281,10 @@ public:
             }
         }
     }
+
+    // @brief End the input loop.
+    // @note This function is thread-safe.
+    void endReceiveInput() { shouldEndReceiveInput_ = true; }
 
 private:
     struct CallbackFunc
@@ -332,12 +339,12 @@ private:
 
     struct Option
     {
-        bool isNewPage;
+        bool enableNewPage;
         std::string text;
         CallbackFunc callback;
     };
 
-    CommandLineMenu() = default;
+    CommandLineMenu() : shouldEndReceiveInput_(false) {};
 
     CommandLineMenu(const CommandLineMenu&) = delete;
 
@@ -385,7 +392,7 @@ private:
             std::cout << topText_ << '\n' << std::endl;
 
         for (size_t i = 0; i < options_.size(); ++i) {
-            if (isShowIndex_)
+            if (enableShowIndex_)
                 std::cout << "[" << i << "] ";
 
             if (i == selectedOption_) {
@@ -407,9 +414,9 @@ private:
     }
 
     // Whether to show the index of each option.
-    bool isShowIndex_                           = false;
+    bool enableShowIndex_                       = false;
     // Whether to show the title (option text) at top of option page.
-    bool isShowOptionPageTitle                  = false;
+    bool enableShowOptionPageTitle_             = false;
     // The max column of option list, used to align the output.
     // Default value is 1, and value 0 is same to value 1.
     size_t maxColumn_                           = 1;
@@ -424,13 +431,15 @@ private:
     std::array<int, 4> directionalControlKey_   = { 'a', 'w', 'd', 's' };
     // Default colir is invaid, indicating that do not set color.
     Rgb backgroundColor_                        = { -1, -1, -1 };
-    Rgb foregroundColor_                        = { 255, 255, 255 };
-    Rgb highlightBackgroundColor_               = { 255, 255, 0 };
-    Rgb highlightForegroundColor_               = { 0, 0, 255 };
+    Rgb foregroundColor_                        = { -1, -1, -1 };
+    Rgb highlightBackgroundColor_               = { -1, -1, -1 };
+    Rgb highlightForegroundColor_               = { 0, 255, 0 };
     std::string topText_;
     std::string bottomText_;
-    std::string optionEndedText_;
+    std::string newPageEndedText_;
     std::vector<Option> options_;
+    // Whether to end the input loop.
+    std::atomic<bool> shouldEndReceiveInput_;
 };
 
 #endif // !COMMAND_LINE_MENU_HPP
