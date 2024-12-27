@@ -218,11 +218,13 @@ public:
 
         options_[selectedOption_].callback.execute();
 
-        if (!newPageEndedText_.empty())
+        if (options_[index].enableNewPage && !newPageEndedText_.empty())
             std::cout << '\n' << newPageEndedText_ << std::endl;
 
-        while (::_getch() != escKey_)
-            continue;
+        if (options_[index].enableNewPage) {
+            while (::_getch() != escKey_)
+                continue;
+        }
 
         clearConsole();
     }
