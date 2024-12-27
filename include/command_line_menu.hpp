@@ -111,8 +111,8 @@ public:
     {
         options_.push_back(Option { enableNewPage, optionText, callbackFunc });
 
-        if (enableAutoAdjustOptionTextWidth_ && optionText.size() > optionTextWidth_)
-            optionTextWidth_ = optionText.size();
+        if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
+            optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
     // overload
@@ -125,8 +125,8 @@ public:
     {
         options_.push_back(Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
 
-        if (enableAutoAdjustOptionTextWidth_ && optionText.size() > optionTextWidth_)
-            optionTextWidth_ = optionText.size();
+        if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
+            optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
     // @brief Insert a new option to the specified position.
@@ -138,8 +138,8 @@ public:
     {
         options_.insert(options_.begin() + index, Option { enableNewPage, optionText, callbackFunc });
 
-        if (enableAutoAdjustOptionTextWidth_ && optionText.size() > optionTextWidth_)
-            optionTextWidth_ = optionText.size();
+        if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
+            optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
     // @brief Insert a new option to the specified position.
@@ -154,8 +154,8 @@ public:
         options_.insert(options_.begin() + index,
                         Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
 
-        if (enableAutoAdjustOptionTextWidth_ && optionText.size() > optionTextWidth_)
-            optionTextWidth_ = optionText.size();
+        if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
+            optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
     // @brief Remove an option by its index.
@@ -215,14 +215,15 @@ public:
     void setEnableShowOptionPageTitle(bool enable) { enableShowOptionPageTitle_ = enable; }
 
     // @brief Set whether to adjust the option text width based on the the longest option text automatically.
+    // @attention This function should be called before addOption() or insertOption().
     void setEnableAutoAdjustOptionTextWidth(bool enable) { enableAutoAdjustOptionTextWidth_ = enable; }
 
     // @brief Set the column separator.
-    // (default is '\t')
+    // (default is '|')
     void setColumnSeparator(char separator) { columnSeparator_ = separator; }
 
     // @brief Set the row separator.
-    // (default is '\0' indicating no separator)
+    // (default is '-', and value '\0' indicating no separator)
     void setRowSeparator(char separator) { rowSeparator_ = separator; }
 
     // @brief Set the alignment of the option text.
@@ -476,11 +477,14 @@ private:
 
         switch (alignment) {
             case 0:
-                return str;
+                return str + std::string(width - str.size(), ' ');
             case 1:
                 return std::string(width - str.size(), ' ') + str;
-            case 2:
-                return std::string((width - str.size()) / 2, ' ') + str + std::string((width - str.size()) / 2, ' ');
+            case 2: {
+                std::string tmp = std::string((width - str.size()) / 2, ' ') + str;
+                tmp += std::string(width - tmp.size(), ' ');
+                return tmp;
+            }
             default:
                 return str;
         }
@@ -522,52 +526,94 @@ private:
     // @brief Update the console output.
     void update_()
     {
+        // Clear the console and move the cursor to the top left position.
         std::cout << "\033[3J\033[H";
 
+        // Output the top text if #topText_ is not empty.
         if (!topText_.empty())
             std::cout << topText_ << '\n' << std::endl;
+
+        // Calculate the width of each row, based on the max column and option text width.
+        // And attention, that conatins all column separator.
+        size_t rowWidth = (optionTextWidth_ + 1) * maxColumn_ + 1;
+
+        // Output the row separator at top first, if #rowSeparator_ is not '\0'.
+        if (rowSeparator_ != '\0')
+            std::cout << std::string(rowWidth, rowSeparator_) << std::endl;
 
         for (size_t i = 0; i < options_.size(); ++i) {
             std::string text;
 
+            // Get the index text of option if #enableShowIndex_ is true.
             if (enableShowIndex_)
                 text += "[" + std::to_string(i) + "] ";
 
+            // Get the full option text (with index if #enableShowIndex_ is true).
             text += options_[i].text;
 
-            if (optionTextWidth_ > 0)
+            // Adjust the option text width and justify the text if the #optionTextWidth_ is not 0.
+            if (optionTextWidth_ != 0)
                  text = justifyString(text, optionTextWidth_, optionTextAlignment_);
 
+            std::cout << columnSeparator_;
+
+            // Output the full option text with specified color.
             if (i == selectedOption_) {
                 outputText_(text, highlightForegroundColor_, highlightBackgroundColor_);
             } else {
                 outputText_(text, foregroundColor_, backgroundColor_);
             }
 
-            if (maxColumn_ == 0 || i % maxColumn_ == maxColumn_ - 1 || i == options_.size() - 1) {
+            size_t posInRow = i % maxColumn_;
+            bool isLastOneInRow = posInRow == maxColumn_ - 1 || i == options_.size() - 1;
+            // If current option is the last one in the row output the row separator.
+            if (isLastOneInRow) {
+                // First, output the column separator for the last one in the row or the last one in the option list.
+                std::cout << columnSeparator_;
+
                 if (rowSeparator_ == '\0') {
                     std::cout << std::endl;
                 } else {
+                    if (posInRow != maxColumn_ - 1) {
+                        size_t supplementWidth = (maxColumn_ - posInRow - 1) * (optionTextWidth_ + 1);
+                        std::string supplement(supplementWidth, ' ');
+
+                        size_t curpos = optionTextWidth_;
+                        for (size_t i = 0; i < maxColumn_ - posInRow - 1; ++i) {
+                            supplement[curpos] = columnSeparator_;
+                            curpos += optionTextWidth_ + 1;
+                        }
+
+                        std::cout << supplement;
+                    }
+
                     std::cout << std::endl;
 
-                    std::string separator(optionTextWidth_ * maxColumn_, rowSeparator_);
-                    for (size_t i = 0; i < maxColumn_; ++i) {
-                        if (i == 0 || i == maxColumn_ - 1)
-                            continue;
+                    std::string separator(rowWidth, rowSeparator_);
 
-                        separator[i * optionTextWidth_] = columnSeparator_;
+                    if (i != options_.size() - 1) {
+                        size_t curpos = 0;
+                        for (size_t i = 0; i < maxColumn_ + 1; ++i) {
+                            separator[curpos] = columnSeparator_;
+                            curpos += optionTextWidth_ + 1;
+                        }
                     }
+
+                    std::cout << separator << std::endl;
                 }
-            } else {
-                std::cout << columnSeparator_;
             }
         }
 
+        // Output the bottom text if #bottomText_ is not empty.
         if (!bottomText_.empty())
             std::cout << '\n' << bottomText_ << std::endl;
 
         std::cout << std::endl << std::flush;
     }
+
+    // The value of reserve space to prevent the index of option out of range
+    // when adjust the option text width automatically.
+    static const size_t reserveSpace = 8;
 
     // Whether to show the index of each option.
     bool enableShowIndex_                       = false;
@@ -575,10 +621,10 @@ private:
     bool enableShowOptionPageTitle_             = false;
     // Whether to adjust the option text width based on the the longest option text automatically.
     bool enableAutoAdjustOptionTextWidth_       = false;
-    // Separator of each column. (default is '\t')
-    char columnSeparator_                       = '\t';
-    // Separator of each row. (default is '\0' indicating no separator)
-    char rowSeparator_                          = '\0';
+    // Separator of each column. (default is '|')
+    char columnSeparator_                       = '|';
+    // Separator of each row. (default is '-', and value '\0' indicating no separator)
+    char rowSeparator_                          = '-';
     // The alignment of option text, used to align the output.
     // Default value is 0.
     // The value 0 indicates that do left justified.
