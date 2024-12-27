@@ -209,10 +209,14 @@ public:
             clearConsole();
 
             if (enableShowOptionPageTitle_) {
+                std::string title;
                 if (enableShowIndex_)
-                    std::cout << "[" << selectedOption_ << "] ";
+                    title = "[" + std::to_string(selectedOption_) + "] ";
 
-                std::cout << options_[selectedOption_].text << '\n' << std::endl;
+                title += options_[selectedOption_].text;
+
+                std::cout << title << std::endl;
+                std::cout << std::string(title.size(), '-') << '\n' << std::endl;
             }
         }
 
