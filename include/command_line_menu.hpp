@@ -305,7 +305,7 @@ public:
         update_();
     }
 
-    /// @brief Start to recving input from console.
+    /// @brief Start to receive input from console.
     /// @attention This function will block the current thread, and will not return until the input loop is exited.
     void startReceiveInput()
     {
