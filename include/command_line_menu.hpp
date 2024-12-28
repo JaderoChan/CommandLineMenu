@@ -93,6 +93,7 @@ public:
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
+    /// @overload
     /// @brief Insert a new option to the specified position.
     /// @param index            The position to insert the option.
     /// @param optionText       The text of the option.
@@ -139,6 +140,7 @@ public:
         options_[index].callback = CallbackFunc(callbackFunc);
     }
 
+    /// @overload
     /// @brief Set the callback function and argument of specified option.
     void setOptionCallback(size_t index, ArgFunc callbackFunc, Arg arg)
     {
