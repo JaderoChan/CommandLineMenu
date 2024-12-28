@@ -205,6 +205,8 @@ public:
     void setDirectionalControlKey(const std::array<int, 4>& keys) { directionalControlKey_ = keys; }
 
     /// @brief Set the max column of option menu, used to align the output.
+    /// Default is 1.
+    /// @attention Set value 0 has the same effect as setting 1.
     void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
 
     /// @brief Set the justified width of the option text.
