@@ -176,7 +176,8 @@ public:
     void setColumnSeparator(char separator) { columnSeparator_ = separator; }
 
     /// @brief Set the row separator.
-    /// Default is '-', and value '\0' indicating no separator.
+    /// Default is '-'.
+    /// @attention The value '\0' indicating no separator.
     /// @attention If the option text width is 0, the row separator will not be output.
     void setRowSeparator(char separator) { rowSeparator_ = separator; }
 
