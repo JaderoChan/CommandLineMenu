@@ -298,7 +298,7 @@ public:
 #endif // _WIN32
     }
 
-    /// @brief Output all options to console.
+    /// @brief Show the menu.
     void show()
     {
         clearConsole();
