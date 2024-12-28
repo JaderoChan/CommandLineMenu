@@ -2,7 +2,7 @@
 //
 // Webs: https://github.com/JaderoChan/CommandLineMenu
 // You can contact me by email: c_dl_cn@outlook.com
-//
+
 // MIT License
 //
 // Copyright (c) 2024 頔珞JaderoChan
@@ -54,10 +54,10 @@ public:
 
     CommandLineMenu& operator=(const CommandLineMenu& other) = delete;
 
-    // @brief Add a new option to the last position.
-    // @param optionText        The text of the option.
-    // @param callbackFunc      The callback function when the option is triggered.
-    // @param enableNewPage     Whether go to the new page when the option be triggered.
+    /// @brief Add a new option to the last position.
+    /// @param optionText       The text of the option.
+    /// @param callbackFunc     The callback function when the option is triggered.
+    /// @param enableNewPage    Whether go to the new page when the option be triggered.
     void addOption(const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, callbackFunc });
@@ -66,12 +66,12 @@ public:
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
-    // overload
-    // @brief Add a new option to the last position.
-    // @param optionText        The text of the option.
-    // @param callbackFunc      The callback function when the option is triggered.
-    // @param arg               The argument of the callback function.
-    // @param enableNewPage     Whether go to the new page when the option be triggered.
+    /// @overload
+    /// @brief Add a new option to the last position.
+    /// @param optionText       The text of the option.
+    /// @param callbackFunc     The callback function when the option is triggered.
+    /// @param arg              The argument of the callback function.
+    /// @param enableNewPage    Whether go to the new page when the option be triggered.
     void addOption(const std::string& optionText, ArgFunc callbackFunc, Arg arg, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
@@ -80,11 +80,11 @@ public:
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
-    // @brief Insert a new option to the specified position.
-    // @param index             The position to insert the option.
-    // @param optionText        The text of the option.
-    // @param callbackFunc      The callback function when the option is triggered.
-    // @param enableNewPage     Whether go to the new page when the option be triggered.
+    /// @brief Insert a new option to the specified position.
+    /// @param index            The position to insert the option.
+    /// @param optionText       The text of the option.
+    /// @param callbackFunc     The callback function when the option is triggered.
+    /// @param enableNewPage    Whether go to the new page when the option be triggered.
     void insertOption(size_t index, const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.insert(options_.begin() + index, Option { enableNewPage, optionText, callbackFunc });
@@ -93,12 +93,12 @@ public:
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
-    // @brief Insert a new option to the specified position.
-    // @param index             The position to insert the option.
-    // @param optionText        The text of the option.
-    // @param callbackFunc      The callback function when the option is triggered.
-    // @param arg               The argument of the callback function.
-    // @param enableNewPage     Whether go to the new page when the option be triggered.
+    /// @brief Insert a new option to the specified position.
+    /// @param index            The position to insert the option.
+    /// @param optionText       The text of the option.
+    /// @param callbackFunc     The callback function when the option is triggered.
+    /// @param arg              The argument of the callback function.
+    /// @param enableNewPage    Whether go to the new page when the option be triggered.
     void insertOption(size_t index, const std::string& optionText, ArgFunc callbackFunc, Arg arg,
                       bool enableNewPage = true)
     {
@@ -109,10 +109,10 @@ public:
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
-    // @brief Remove an option by its index.
+    /// @brief Remove an option by its index.
     void removeOption(size_t index) { options_.erase(options_.begin() + index); }
 
-    // @brief Remove all options.
+    /// @brief Remove all options.
     void removeAllOption()
     {
         options_.clear();
@@ -121,10 +121,10 @@ public:
             optionTextWidth_ = 0;
     }
 
-    // @brief Set the whether go to the new page when the option be triggered.
+    /// @brief Set the whether go to the new page when the option be triggered.
     void setOptionEnableNewPage(size_t index, bool enable) { options_[index].enableNewPage = enable; }
 
-    // @brief Set the text of specified option.
+    /// @brief Set the text of specified option.
     void setOptionText(size_t index, const std::string& text)
     {
         options_[index].text = text;
@@ -133,21 +133,21 @@ public:
             optionTextWidth_ = text.size();
     }
 
-    // @brief Set the callback function of specified option.
+    /// @brief Set the callback function of specified option.
     void setOptionCallback(size_t index, VoidFunc callbackFunc)
     {
         options_[index].callback = CallbackFunc(callbackFunc);
     }
 
-    // @brief Set the callback function and argument of specified option.
+    /// @brief Set the callback function and argument of specified option.
     void setOptionCallback(size_t index, ArgFunc callbackFunc, Arg arg)
     {
         options_[index].callback = CallbackFunc(callbackFunc, arg);
     }
 
-    // @brief Set the argument of specified option.
-    // @attention Only available when the option has argument.
-    // @throw runtime_error If the option has no callback function with argument.
+    /// @brief Set the argument of specified option.
+    /// @attention Only available when the option has argument.
+    /// @throw runtime_error If the option has no callback function with argument.
     void setOptionCallbackArg(size_t index, Arg arg)
     {
         if (options_[index].callback.isArgFunc)
@@ -156,60 +156,60 @@ public:
             throw std::runtime_error("Specified option has no callback function with argument.");
     }
 
-    // @brief Get the count of options.
+    /// @brief Get the count of options.
     size_t optionCount() const { return options_.size(); }
 
-    // @brief Set whether to show the index of each option.
+    /// @brief Set whether to show the index of each option.
     void setEnableShowIndex(bool enable) { enableShowIndex_ = enable; }
 
-    // @brief Set whether to show the title (option text) of each option page.
+    /// @brief Set whether to show the title (option text) of each option page.
     void setEnableShowOptionPageTitle(bool enable) { enableShowOptionPageTitle_ = enable; }
 
-    // @brief Set whether to adjust the option text width based on the the longest option text automatically.
-    // @attention This function should be called before addOption() or insertOption().
+    /// @brief Set whether to adjust the option text width based on the the longest option text automatically.
+    /// @attention This function should be called before addOption() or insertOption().
     void setEnableAutoAdjustOptionTextWidth(bool enable) { enableAutoAdjustOptionTextWidth_ = enable; }
 
-    // @brief Set the column separator.
-    // (default is '|')
+    /// @brief Set the column separator.
+    /// (default is '|')
     void setColumnSeparator(char separator) { columnSeparator_ = separator; }
 
-    // @brief Set the row separator.
-    // (default is '-', and value '\0' indicating no separator)
-    // @note If the option text width is 0, the row separator will not be output.
+    /// @brief Set the row separator.
+    /// (default is '-', and value '\0' indicating no separator)
+    /// @note If the option text width is 0, the row separator will not be output.
     void setRowSeparator(char separator) { rowSeparator_ = separator; }
 
-    // @brief Set the alignment of the option text.
-    // @note Default value is 0.
-    // @note The value 0 indicates that do left justified.
-    // @note The value 1 indicates that do right justified.
-    // @note The value 2 indicates that do center justified.
-    // (based on the current option text length and the OptionTextWidth)
+    /// @brief Set the alignment of the option text.
+    /// @note Default value is 0.
+    /// @note The value 0 indicates that do left justified.
+    /// @note The value 1 indicates that do right justified.
+    /// @note The value 2 indicates that do center justified.
+    /// (based on the current option text length and the OptionTextWidth)
     void setOptionTextAlignment(int alignment) { optionTextAlignment_ = alignment; }
 
-    // @brief Set the enter key, used to trigger the selected option.
+    /// @brief Set the enter key, used to trigger the selected option.
     void setEnterKey(int key) { enterKey_ = key; }
 
-    // @brief Set the esc key, used to return to the main menu or exit the input loop.
+    /// @brief Set the esc key, used to return to the main menu or exit the input loop.
     void setEscKey(int key) { escKey_ = key; }
 
-    // @brief Set the directional control key, used to select option.
+    /// @brief Set the directional control key, used to select option.
     void setDirectionalControlKey(int left, int up, int right, int down)
     {
         directionalControlKey_ = { left, up, right, down };
     }
 
-    // @overload
+    /// @overload
     void setDirectionalControlKey(const std::array<int, 4>& keys) { directionalControlKey_ = keys; }
 
-    // @brief Set the max column of option menu, used to align the output.
+    /// @brief Set the max column of option menu, used to align the output.
     void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
 
-    // @brief Set the justified width of the option text.
-    // @note Default value is 0.
-    // @note The value 0 indicates that do not justify the text, and the row separator will not be output.
+    /// @brief Set the justified width of the option text.
+    /// @note Default value is 0.
+    /// @note The value 0 indicates that do not justify the text, and the row separator will not be output.
     void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
 
-    // @brief Set the current selected option (highlight option).
+    /// @brief Set the current selected option (highlight option).
     void setHighlightedOption(size_t index)
     {
         if (index >= options_.size())
@@ -218,33 +218,33 @@ public:
             selectedOption_ = index;
     }
 
-    // @brief Select the specified option, the same as setHighlightedOption().
+    /// @brief Select the specified option, the same as setHighlightedOption().
     void selectOption(size_t index) { setHighlightedOption(index); }
 
-    // @brief Set the background color of the option text.
+    /// @brief Set the background color of the option text.
     void setBackgroundColor(int r, int g, int b) { backgroundColor_ = { r, g, b }; }
 
-    // @brief Set the foreground color of the option text.
+    /// @brief Set the foreground color of the option text.
     void setForegroundColor(int r, int g, int b) { foregroundColor_ = { r, g, b }; }
 
-    // @brief Set the highlight background color of option selected.
+    /// @brief Set the highlight background color of option selected.
     void setHighlightBackgroundColor(int r, int g, int b) { highlightBackgroundColor_ = { r, g, b }; }
 
-    // @brief Set the highlight foreground color of option selected.
+    /// @brief Set the highlight foreground color of option selected.
     void setHighlightForegroundColor(int r, int g, int b) { highlightForegroundColor_ = { r, g, b }; }
 
-    // @brief Set the top text of the option list.
+    /// @brief Set the top text of the option list.
     void setTopText(const std::string& text) { topText_ = text; }
 
-    // @brief Set the bottom text of the option list.
+    /// @brief Set the bottom text of the option list.
     void setBottomText(const std::string& text) { bottomText_ = text; }
 
-    // @brief Set the text be displayed when the option page ended.
-    // Example you can set "Press ESC key to back to the main menu."
+    /// @brief Set the text be displayed when the option page ended.
+    /// Example you can set "Press ESC key to back to the main menu."
     void setNewPageEndedText(const std::string& text) { newPageEndedText_ = text; }
 
-    // @brief Select and trigger the specified option.
-    // @note Not throw exception even if the index is out of range or the option's callback function is null.
+    /// @brief Select and trigger the specified option.
+    /// @note Not throw exception even if the index is out of range or the option's callback function is null.
     void triggerOption(size_t index)
     {
         if (index >= options_.size())
@@ -283,7 +283,7 @@ public:
         clearConsole();
     }
 
-    // @brief Clear the console.
+    /// @brief Clear the console.
     void clearConsole()
     {
 #ifdef _WIN32
@@ -293,15 +293,15 @@ public:
 #endif // _WIN32
     }
 
-    // @brief Output all options to console.
+    /// @brief Output all options to console.
     void show()
     {
         clearConsole();
         update_();
     }
 
-    // @brief Start to recving input from console.
-    // @note This function will block the current thread, and will not return until the input loop is exited.
+    /// @brief Start to recving input from console.
+    /// @note This function will block the current thread, and will not return until the input loop is exited.
     void startReceiveInput()
     {
         while (!shouldEndReceiveInput_) {
@@ -352,8 +352,8 @@ public:
         }
     }
 
-    // @brief End the input loop.
-    // @note This function is thread-safe.
+    /// @brief End the input loop.
+    /// @note This function is thread-safe.
     void endReceiveInput() { shouldEndReceiveInput_ = true; }
 
 private:
@@ -447,24 +447,24 @@ private:
         return (r >= 0 && r <= 255) && (g >= 0 && g <= 255) && (b >= 0 && b <= 255);
     }
 
-    // @brief Reset all console attributes.
+    // Reset all console attributes.
     void resetConsoleAttribute_() { std::cout << "\033[0m"; }
 
-    // @brief Set the console background color of text.
+    // Set the console background color of text.
     void setConsoleBackgroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
             std::cout << "\033[48;2;" << r << ";" << g << ";" << b << "m";
     }
 
-    // @brief Set the console foreground color of text.
+    // Set the console foreground color of text.
     void setConsoleForegroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
             std::cout << "\033[38;2;" << r << ";" << g << ";" << b << "m";
     }
 
-    // @brief Output the text with specified color.
+    // Output the text with specified color.
     void outputText_(const std::string& text, const Rgb& foregroundColor, const Rgb& backgroundColor)
     {
         setConsoleForegroundColor_(foregroundColor[0], foregroundColor[1], foregroundColor[2]);
@@ -475,7 +475,7 @@ private:
         resetConsoleAttribute_();
     }
 
-    // @brief Update the console output.
+    // Update the console output.
     void update_()
     {
         // Clear the console and move the cursor to the top left position.
