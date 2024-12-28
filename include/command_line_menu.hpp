@@ -213,6 +213,7 @@ public:
     void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
 
     /// @brief Set the current selected option (highlight option).
+    /// @attention If the given index is out of range, the last option of the menu will be selected.
     void setHighlightedOption(size_t index)
     {
         if (index >= options_.size())
