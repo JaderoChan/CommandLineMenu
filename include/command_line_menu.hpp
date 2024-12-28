@@ -149,7 +149,7 @@ public:
 
     /// @brief Set the argument of specified option.
     /// @attention Only available when the option has argument.
-    /// @throw runtime_error If the option has no callback function with argument.
+    /// @throw Throw runtime_error exception if the option has no callback function with argument.
     void setOptionCallbackArg(size_t index, Arg arg)
     {
         if (options_[index].callback.isArgFunc)
@@ -172,20 +172,20 @@ public:
     void setEnableAutoAdjustOptionTextWidth(bool enable) { enableAutoAdjustOptionTextWidth_ = enable; }
 
     /// @brief Set the column separator.
-    /// (default is '|')
+    /// Default is '|'.
     void setColumnSeparator(char separator) { columnSeparator_ = separator; }
 
     /// @brief Set the row separator.
-    /// (default is '-', and value '\0' indicating no separator)
-    /// @note If the option text width is 0, the row separator will not be output.
+    /// Default is '-', and value '\0' indicating no separator.
+    /// @attention If the option text width is 0, the row separator will not be output.
     void setRowSeparator(char separator) { rowSeparator_ = separator; }
 
     /// @brief Set the alignment of the option text.
-    /// @note Default value is 0.
+    /// Default value is 0.
     /// @note The value 0 indicates that do left justified.
     /// @note The value 1 indicates that do right justified.
     /// @note The value 2 indicates that do center justified.
-    /// (based on the current option text length and the OptionTextWidth)
+    /// @attention If the option text width is 0, the alignment is invalid.
     void setOptionTextAlignment(int alignment) { optionTextAlignment_ = alignment; }
 
     /// @brief Set the enter key, used to trigger the selected option.
@@ -207,7 +207,7 @@ public:
     void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
 
     /// @brief Set the justified width of the option text.
-    /// @note Default value is 0.
+    /// Default value is 0.
     /// @note The value 0 indicates that do not justify the text, and the row separator will not be output.
     void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
 
@@ -247,7 +247,7 @@ public:
     void setNewPageEndedText(const std::string& text) { newPageEndedText_ = text; }
 
     /// @brief Select and trigger the specified option.
-    /// @note Not throw exception even if the index is out of range or the option's callback function is null.
+    /// @attention Not throw exception even if the index is out of range or the option's callback function is null.
     void triggerOption(size_t index)
     {
         if (index >= options_.size())
@@ -304,7 +304,7 @@ public:
     }
 
     /// @brief Start to recving input from console.
-    /// @note This function will block the current thread, and will not return until the input loop is exited.
+    /// @attention This function will block the current thread, and will not return until the input loop is exited.
     void startReceiveInput()
     {
         while (!shouldEndReceiveInput_) {
