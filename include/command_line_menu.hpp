@@ -219,6 +219,7 @@ public:
     }
 
     /// @brief Select the specified option, the same as setHighlightedOption().
+    /// @sa setHighlightOption()
     void selectOption(size_t index) { setHighlightedOption(index); }
 
     /// @brief Set the background color of the option text.
