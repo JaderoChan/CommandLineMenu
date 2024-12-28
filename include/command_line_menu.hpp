@@ -171,18 +171,15 @@ public:
     /// @attention This function should be called before addOption() or insertOption().
     void setEnableAutoAdjustOptionTextWidth(bool enable) { enableAutoAdjustOptionTextWidth_ = enable; }
 
-    /// @brief Set the column separator.
-    /// Default is '|'.
+    /// @brief Set the column separator. Default is '|'.
     void setColumnSeparator(char separator) { columnSeparator_ = separator; }
 
-    /// @brief Set the row separator.
-    /// Default is '-'.
+    /// @brief Set the row separator. Default is '-'.
     /// @attention The value '\0' indicating no separator.
     /// @attention If the option text width is 0, the row separator will not be output.
     void setRowSeparator(char separator) { rowSeparator_ = separator; }
 
-    /// @brief Set the alignment of the option text.
-    /// Default value is 0.
+    /// @brief Set the alignment of the option text. Default value is 0.
     /// @note The value 0 indicates that do left justified.
     /// @note The value 1 indicates that do right justified.
     /// @note The value 2 indicates that do center justified.
@@ -204,13 +201,11 @@ public:
     /// @overload
     void setDirectionalControlKey(const std::array<int, 4>& keys) { directionalControlKey_ = keys; }
 
-    /// @brief Set the max column of option menu, used to align the output.
-    /// Default is 1.
+    /// @brief Set the max column of option menu, used to align the output. Default is 1.
     /// @attention Set value 0 has the same effect as setting 1.
     void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
 
-    /// @brief Set the justified width of the option text.
-    /// Default value is 0.
+    /// @brief Set the justified width of the option text. Default value is 0.
     /// @note The value 0 indicates that do not justify the text, and the row separator will not be output.
     void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
 
@@ -228,16 +223,24 @@ public:
     /// @sa setHighlightOption()
     void selectOption(size_t index) { setHighlightedOption(index); }
 
-    /// @brief Set the background color of the option text.
+    /// @brief Set the background color of the option text. The default is determined by the console.
+    /// @note When r, g, b values are invalid (for example, [-1, -1, -1]),
+    // the default colors of the console will be restored.
     void setBackgroundColor(int r, int g, int b) { backgroundColor_ = { r, g, b }; }
 
-    /// @brief Set the foreground color of the option text.
+    /// @brief Set the foreground color of the option text. The default is determined by the console.
+    /// @note When r, g, b values are invalid (for example, [-1, -1, -1]),
+    // the default colors of the console will be restored.
     void setForegroundColor(int r, int g, int b) { foregroundColor_ = { r, g, b }; }
 
-    /// @brief Set the highlight background color of option selected.
+    /// @brief Set the highlight background color of option selected. The default is determined by the console.
+    /// @note When r, g, b values are invalid (for example, [-1, -1, -1]),
+    // the default colors of the console will be restored.
     void setHighlightBackgroundColor(int r, int g, int b) { highlightBackgroundColor_ = { r, g, b }; }
 
-    /// @brief Set the highlight foreground color of option selected.
+    /// @brief Set the highlight foreground color of option selected. The default is green, rgb[0, 255, 0].
+    /// @note When r, g, b values are invalid (for example, [-1, -1, -1]),
+    // the default colors of the console will be restored.
     void setHighlightForegroundColor(int r, int g, int b) { highlightForegroundColor_ = { r, g, b }; }
 
     /// @brief Set the top text of the option list.
@@ -247,7 +250,7 @@ public:
     void setBottomText(const std::string& text) { bottomText_ = text; }
 
     /// @brief Set the text be displayed when the option page ended.
-    /// Example you can set "Press ESC key to back to the main menu."
+    /// Example you can set "Press ESC key to back to the main menu.".
     void setNewPageEndedText(const std::string& text) { newPageEndedText_ = text; }
 
     /// @brief Select and trigger the specified option.
@@ -580,20 +583,19 @@ private:
     bool enableShowOptionPageTitle_             = false;
     // Whether to adjust the option text width based on the the longest option text automatically.
     bool enableAutoAdjustOptionTextWidth_       = false;
-    // Separator of each column. (default is '|')
+    // Separator of each column. Default is '|'.
     char columnSeparator_                       = '|';
-    // Separator of each row. (default is '-', and value '\0' indicating no separator)
+    // Separator of each row. Default is '-'.
+    // If it is '\0' indicating no separator.
     char rowSeparator_                          = '-';
-    // The alignment of option text, used to align the output.
-    // Default value is 0.
+    // The alignment of option text, used to align the output. Default value is 0.
     // The value 0 indicates that do left justified.
     // The value 1 indicates that do right justified.
     // The value 2 indicates that do center justified.
-    // (based on the current option text length and the OptionTextWidth)
     int optionTextAlignment_                    = 0;
-    // Enter key, used to trigger the option.
+    // Enter key, used to trigger the option. Default is 0x0D.
     int enterKey_                               = 0x0D;
-    // Esc key, used to return to the main menu or exit the input loop.
+    // Esc key, used to return to the main menu or exit the input loop. Default is 0x1B.
     int escKey_                                 = 0x1B;
     // Directional control key, used to select option.
     // Left, Up, Right, Down
@@ -601,13 +603,11 @@ private:
     // The max column of option list, used to align the output.
     // Default value is 1, and value 0 is same to value 1.
     size_t maxColumn_                           = 1;
-    // The justified width of option text, used to align the output.
-    // Default value is 0.
+    // The justified width of option text, used to align the output. Default value is 0.
     // The value 0 indicates that do not justify the text, and the row separator will not be output.
     size_t optionTextWidth_                     = 0;
     // Current selected option index.
     size_t selectedOption_                      = 0;
-    // Default colir is invaid, indicating that do not set color.
     Rgb backgroundColor_                        = { -1, -1, -1 };
     Rgb foregroundColor_                        = { -1, -1, -1 };
     Rgb highlightBackgroundColor_               = { -1, -1, -1 };
