@@ -164,9 +164,6 @@ public:
     /// @brief Set whether to show the index of each option.
     void setEnableShowIndex(bool enable) { enableShowIndex_ = enable; }
 
-    /// @brief Set whether to show the title (option text) of each option page.
-    void setEnableShowOptionPageTitle(bool enable) { enableShowOptionPageTitle_ = enable; }
-
     /// @brief Set whether to adjust the option text width based on the the longest option text automatically.
     /// @attention This function should be called before addOption() or insertOption().
     void setEnableAutoAdjustOptionTextWidth(bool enable) { enableAutoAdjustOptionTextWidth_ = enable; }
@@ -249,10 +246,6 @@ public:
     /// @brief Set the bottom text of the option list.
     void setBottomText(const std::string& text) { bottomText_ = text; }
 
-    /// @brief Set the text be displayed when the option page ended.
-    /// Example you can set "Press ESC key to back to the main menu.".
-    void setNewPageEndedText(const std::string& text) { newPageEndedText_ = text; }
-
     /// @brief Select and trigger the specified option.
     /// @attention Not throw exception even if the index is out of range or the option's callback function is null.
     void triggerOption(size_t index)
@@ -265,30 +258,10 @@ public:
         if (!options_[index].callback.isValid())
             return;
 
-        if (options_[index].enableNewPage) {
+        if (options_[index].enableNewPage)
             clearConsole();
 
-            if (enableShowOptionPageTitle_) {
-                std::string title;
-                if (enableShowIndex_)
-                    title = "[" + std::to_string(selectedOption_) + "] ";
-
-                title += options_[selectedOption_].text;
-
-                std::cout << title << std::endl;
-                std::cout << std::string(title.size(), '-') << '\n' << std::endl;
-            }
-        }
-
         options_[selectedOption_].callback.execute();
-
-        if (options_[index].enableNewPage && !newPageEndedText_.empty())
-            std::cout << '\n' << newPageEndedText_ << std::endl;
-
-        if (options_[index].enableNewPage) {
-            while (::_getch() != escKey_)
-                continue;
-        }
 
         clearConsole();
     }
@@ -579,10 +552,8 @@ private:
 
     // Whether to show the index of each option.
     bool enableShowIndex_                       = false;
-    // Whether to show the title (option text) at top of option page.
-    bool enableShowOptionPageTitle_             = false;
     // Whether to adjust the option text width based on the the longest option text automatically.
-    bool enableAutoAdjustOptionTextWidth_       = false;
+    bool enableAutoAdjustOptionTextWidth_       = true;
     // Separator of each column. Default is '|'.
     char columnSeparator_                       = '|';
     // Separator of each row. Default is '-'.
@@ -614,7 +585,6 @@ private:
     Rgb highlightForegroundColor_               = { 0, 255, 0 };
     std::string topText_;
     std::string bottomText_;
-    std::string newPageEndedText_;
     std::vector<Option> options_;
     // Whether to end the input loop.
     std::atomic<bool> shouldEndReceiveInput_;

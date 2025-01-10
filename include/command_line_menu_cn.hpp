@@ -156,9 +156,6 @@ public:
     /// @brief 设置是否为每个选项显示其索引值。
     void setEnableShowIndex(bool enable) { enableShowIndex_ = enable; }
 
-    /// @brief 设置是否在选项页面顶部显示标题（（标题等同于其在菜单显示的文本，包括可能存在的索引文本）。
-    void setEnableShowOptionPageTitle(bool enable) { enableShowOptionPageTitle_ = enable; }
-
     /// @brief 设置是否基于最长的选项文本自动调整选项文本宽度。
     /// @attention 这个函数应该在 addOption() 和 insertOption() 之前调用。
     void setEnableAutoAdjustOptionTextWidth(bool enable) { enableAutoAdjustOptionTextWidth_ = enable; }
@@ -200,7 +197,7 @@ public:
     /// @brief 设置选项的文本宽度，用于布局菜单选项。默认为0。
     /// @note 如果选项文本大于此值则会将溢出部分更改为 ... 以示省略，否则将按照对齐方式将文本前后添置空格。
     /// @note 如果为0则表示不对文本进行对齐与布局，并且行分隔符将被禁用。
-    void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
+    void setOptionTextWidth(size_t width) { optionTextWidth_ = width; }
 
     /// @brief 设置当前选中（高光）的项。
     /// @attention 如果所给索引超出范围，则将选中菜单的最后一个选项。
@@ -236,11 +233,8 @@ public:
     void setTopText(const std::string& text) { topText_ = text; }
 
     /// @brief 设置菜单底部的文本。
+    /// 例如你可以设置："按WASD选择选项，按Enter确认，按Esc退出。"
     void setBottomText(const std::string& text) { bottomText_ = text; }
-
-    /// @brief 设置当选项的回调函数返回时，需要在选项页面显示的文本。
-    /// 例如你可以设置 “按Esc键返回主菜单……”。
-    void setNewPageEndedText(const std::string& text) { newPageEndedText_ = text; }
 
     /// @brief 选中并触发指定选项。
     /// @attention 即使所给索引值超出范围或者选项的回调函数为空，也不会抛出异常。
@@ -254,30 +248,10 @@ public:
         if (!options_[index].callback.isValid())
             return;
 
-        if (options_[index].enableNewPage) {
+        if (options_[index].enableNewPage)
             clearConsole();
 
-            if (enableShowOptionPageTitle_) {
-                std::string title;
-                if (enableShowIndex_)
-                    title = "[" + std::to_string(selectedOption_) + "] ";
-
-                title += options_[selectedOption_].text;
-
-                std::cout << title << std::endl;
-                std::cout << std::string(title.size(), '-') << '\n' << std::endl;
-            }
-        }
-
         options_[selectedOption_].callback.execute();
-
-        if (options_[index].enableNewPage && !newPageEndedText_.empty())
-            std::cout << '\n' << newPageEndedText_ << std::endl;
-
-        if (options_[index].enableNewPage) {
-            while (::_getch() != escKey_)
-                continue;
-        }
 
         clearConsole();
     }
@@ -569,10 +543,8 @@ private:
 
     // 控制是否显示选项的索引。
     bool enableShowIndex_                       = false;
-    // 控制是否在选项页面顶部显示标题（等同于其在菜单中的文本，包括可能存在的索引文本）。
-    bool enableShowOptionPageTitle_             = false;
     // 控制是否基于最长的选项文本自动调整选项文本宽度。
-    bool enableAutoAdjustOptionTextWidth_       = false;
+    bool enableAutoAdjustOptionTextWidth_       = true;
     // 列分隔符。默认为：|。
     char columnSeparator_                       = '|';
     // 行分隔符。默认为：-。
@@ -603,7 +575,6 @@ private:
     Rgb highlightForegroundColor_               = { 0, 255, 0 };
     std::string topText_;
     std::string bottomText_;
-    std::string newPageEndedText_;
     std::vector<Option> options_;
     // 控制是否结束输入循环。
     std::atomic<bool> shouldEndReceiveInput_;
