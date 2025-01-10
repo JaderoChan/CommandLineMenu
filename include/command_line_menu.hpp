@@ -30,13 +30,18 @@
 
 #include <cstddef>      // size_t
 #include <cstdlib>      // system()
-#include <conio.h>      // _getch()
 #include <string>       // string
 #include <array>        // array
 #include <vector>       // vector
 #include <atomic>       // atomic
-#include <iostream>     // cout, endl, flush, getchar()
+#include <iostream>     // cout, endl, flush
 #include <stdexcept>    // runtime_error
+
+#ifdef _WIN32
+#include <conio.h>      // _getch()
+#else
+#include <ncurses.h>    // initscr(), cbreak(), noecho() ,getch(), endwin()
+#endif // _WIN32
 
 class CommandLineMenu
 {
@@ -53,6 +58,22 @@ public:
     CommandLineMenu(const CommandLineMenu& other) = delete;
 
     CommandLineMenu& operator=(const CommandLineMenu& other) = delete;
+
+    static int getkey()
+    {
+#ifdef _WIN32
+        return ::_getch();
+#else
+        ::initscr();
+        ::cbreak();
+        ::noecho();
+
+        int ch = ::getch();
+
+        ::endwin();
+        return ch;
+#endif // _WIN32
+    }
 
     /// @brief Add a new option to the last position.
     /// @param optionText       The text of the option.
@@ -291,7 +312,7 @@ public:
             // Clear the input buffer.
             std::cin.clear();
 
-            int key = ::_getch();
+            int key = getkey();
 
             if (key == enterKey_) {
                 triggerOption(selectedOption_);
@@ -397,7 +418,7 @@ private:
         CallbackFunc callback;
     };
 
-    static std::string cutoffString(const std::string& str, size_t width)
+    static std::string cutoffString_(const std::string& str, size_t width)
     {
         if (str.size() <= width)
             return str;
@@ -405,10 +426,10 @@ private:
             return str.substr(0, width - 3) + "...";
     }
 
-    static std::string justifyString(const std::string& str, size_t width, int alignment)
+    static std::string justifyString_(const std::string& str, size_t width, int alignment)
     {
         if (str.size() > width)
-            return justifyString(cutoffString(str, width), width, alignment);
+            return justifyString_(cutoffString_(str, width), width, alignment);
 
         switch (alignment) {
             case 0:
@@ -488,7 +509,7 @@ private:
 
             // Adjust the option text width and justify the text if the #optionTextWidth_ is not 0.
             if (optionTextWidth_ != 0)
-                 text = justifyString(text, optionTextWidth_, optionTextAlignment_);
+                 text = justifyString_(text, optionTextWidth_, optionTextAlignment_);
 
             std::cout << columnSeparator_;
 

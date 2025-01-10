@@ -22,13 +22,18 @@
 
 #include <cstddef>      // size_t
 #include <cstdlib>      // system()
-#include <conio.h>      // _getch()
 #include <string>       // string
 #include <array>        // array
 #include <vector>       // vector
 #include <atomic>       // atomic
-#include <iostream>     // cout, endl, flush, getchar()
+#include <iostream>     // cout, endl, flush
 #include <stdexcept>    // runtime_error
+
+#ifdef _WIN32
+#include <conio.h>      // _getch()
+#else
+#include <ncurses.h>    // initscr(), cbreak(), noecho() ,getch(), endwin()
+#endif // _WIN32
 
 class CommandLineMenu
 {
@@ -45,6 +50,22 @@ public:
     CommandLineMenu(const CommandLineMenu& other) = delete;
 
     CommandLineMenu& operator=(const CommandLineMenu& other) = delete;
+
+    static int getkey()
+    {
+#ifdef _WIN32
+        return ::_getch();
+#else
+        ::initscr();
+        ::cbreak();
+        ::noecho();
+
+        int ch = ::getch();
+
+        ::endwin();
+        return ch;
+#endif // _WIN32
+    }
 
     /// @brief 在尾部添加一个新选项。
     /// @param optionText       选项文本。
@@ -281,7 +302,7 @@ public:
             // 清空输入缓冲区。
             std::cin.clear();
 
-            int key = ::_getch();
+            int key = getkey();
 
             if (key == enterKey_) {
                 triggerOption(selectedOption_);
