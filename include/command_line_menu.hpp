@@ -38,9 +38,9 @@
 #include <stdexcept>    // runtime_error
 
 #ifdef _WIN32
-#include <conio.h>      // _getch()
+    #include <conio.h>      // _getch()
 #else
-#include <ncurses.h>    // initscr(), cbreak(), noecho() ,getch(), endwin()
+    #include <ncurses.h>    // initscr(), cbreak(), noecho() ,getch(), endwin()
 #endif // _WIN32
 
 class CommandLineMenu
@@ -61,9 +61,9 @@ public:
 
     static int getkey()
     {
-#ifdef _WIN32
+    #ifdef _WIN32
         return ::_getch();
-#else
+    #else
         ::initscr();
         ::cbreak();
         ::noecho();
@@ -72,7 +72,7 @@ public:
 
         ::endwin();
         return ch;
-#endif // _WIN32
+    #endif // _WIN32
     }
 
     /// @brief Add a new option to the last position.
@@ -82,7 +82,6 @@ public:
     void addOption(const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, callbackFunc });
-
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
@@ -96,7 +95,6 @@ public:
     void addOption(const std::string& optionText, ArgFunc callbackFunc, Arg arg, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
-
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
@@ -109,7 +107,6 @@ public:
     void insertOption(size_t index, const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.insert(options_.begin() + index, Option { enableNewPage, optionText, callbackFunc });
-
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
@@ -138,7 +135,6 @@ public:
     void removeAllOption()
     {
         options_.clear();
-
         if (enableAutoAdjustOptionTextWidth_)
             optionTextWidth_ = 0;
     }
@@ -150,7 +146,6 @@ public:
     void setOptionText(size_t index, const std::string& text)
     {
         options_[index].text = text;
-
         if (enableAutoAdjustOptionTextWidth_ && text.size() > optionTextWidth_)
             optionTextWidth_ = text.size();
     }
@@ -290,11 +285,11 @@ public:
     /// @brief Clear the console.
     void clearConsole()
     {
-#ifdef _WIN32
+    #ifdef _WIN32
         ::system("cls");
-#else
+    #else
         ::system("clear");
-#endif // _WIN32
+    #endif // _WIN32
     }
 
     /// @brief Show the menu.
@@ -308,45 +303,67 @@ public:
     /// @attention This function will block the current thread, and will not return until the input loop is exited.
     void startReceiveInput()
     {
-        while (!shouldEndReceiveInput_) {
+        while (!shouldEndReceiveInput_)
+        {
             // Clear the input buffer.
             std::cin.clear();
 
             int key = getkey();
-
-            if (key == enterKey_) {
+            if (key == enterKey_)
+            {
                 triggerOption(selectedOption_);
                 update_();
-            } else if (key == escKey_) {
+            }
+            else if (key == escKey_)
+            {
                 shouldEndReceiveInput_ = true;
-            } else if (key == directionalControlKey_[0]) {  // Left
-                if (selectedOption_ > 0) {
+            }
+            // Left
+            else if (key == directionalControlKey_[0])
+            {
+                if (selectedOption_ > 0)
+                {
                     selectOption(selectedOption_ - 1);
                     update_();
                 }
-            } else if (key == directionalControlKey_[1]) {  // Up
+            }
+            // Up
+            else if (key == directionalControlKey_[1])
+            {
                 size_t currentRow = selectedOption_ / maxColumn_;
-                if (currentRow > 0) {
+                if (currentRow > 0)
+                {
                     selectOption(selectedOption_ - maxColumn_);
                     update_();
                 }
-            } else if (key == directionalControlKey_[2]) {  // Right
-                if (!options_.empty()) {
-                    if (selectedOption_ < options_.size() - 1) {
+            }
+            // Right
+            else if (key == directionalControlKey_[2])
+            {
+                if (!options_.empty())
+                {
+                    if (selectedOption_ < options_.size() - 1)
+                    {
                         selectOption(selectedOption_ + 1);
                         update_();
                     }
                 }
-            } else if (key == directionalControlKey_[3]) {  // Down
-                if (!options_.empty()) {
+            }
+            // Down
+            else if (key == directionalControlKey_[3])
+            {
+                if (!options_.empty())
+                {
                     size_t currentRow = selectedOption_ / maxColumn_;
                     size_t sumRow = (options_.size() - 1) / maxColumn_ + 1;
 
-                    if (currentRow < sumRow - 1) {
+                    if (currentRow < sumRow - 1)
+                    {
                         size_t expectedPos = selectedOption_ + maxColumn_;
                         expectedPos = expectedPos < options_.size() ? expectedPos : options_.size() - 1;
 
-                        if (expectedPos != selectedOption_) {
+                        if (expectedPos != selectedOption_)
+                        {
                             selectOption(expectedPos);
                             update_();
                         }
@@ -431,12 +448,14 @@ private:
         if (str.size() > width)
             return justifyString_(cutoffString_(str, width), width, alignment);
 
-        switch (alignment) {
+        switch (alignment)
+        {
             case 0:
                 return str + std::string(width - str.size(), ' ');
             case 1:
                 return std::string(width - str.size(), ' ') + str;
-            case 2: {
+            case 2:
+            {
                 std::string tmp = std::string((width - str.size()) / 2, ' ') + str;
                 tmp += std::string(width - tmp.size(), ' ');
                 return tmp;
@@ -497,7 +516,8 @@ private:
         if (rowSeparator_ != '\0' && optionTextWidth_ != 0)
             std::cout << std::string(rowWidth, rowSeparator_) << std::endl;
 
-        for (size_t i = 0; i < options_.size(); ++i) {
+        for (size_t i = 0; i < options_.size(); ++i)
+        {
             std::string text;
 
             // Get the index text of option if #enableShowIndex_ is true.
@@ -514,28 +534,33 @@ private:
             std::cout << columnSeparator_;
 
             // Output the full option text with specified color.
-            if (i == selectedOption_) {
+            if (i == selectedOption_)
                 outputText_(text, highlightForegroundColor_, highlightBackgroundColor_);
-            } else {
+            else
                 outputText_(text, foregroundColor_, backgroundColor_);
-            }
 
             size_t posInRow = i % maxColumn_;
             bool isLastOneInRow = posInRow == maxColumn_ - 1 || i == options_.size() - 1;
             // If current option is the last one in the row output the row separator.
-            if (isLastOneInRow) {
+            if (isLastOneInRow)
+            {
                 // First, output the column separator for the last one in the row or the last one in the option list.
                 std::cout << columnSeparator_;
 
-                if (rowSeparator_ == '\0' || optionTextWidth_ == 0) {
+                if (rowSeparator_ == '\0' || optionTextWidth_ == 0)
+                {
                     std::cout << std::endl;
-                } else {
-                    if (posInRow != maxColumn_ - 1) {
+                }
+                else
+                {
+                    if (posInRow != maxColumn_ - 1)
+                    {
                         size_t supplementWidth = (maxColumn_ - posInRow - 1) * (optionTextWidth_ + 1);
                         std::string supplement(supplementWidth, ' ');
 
                         size_t curpos = optionTextWidth_;
-                        for (size_t i = 0; i < maxColumn_ - posInRow - 1; ++i) {
+                        for (size_t i = 0; i < maxColumn_ - posInRow - 1; ++i)
+                        {
                             supplement[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
                         }
@@ -547,9 +572,11 @@ private:
 
                     std::string separator(rowWidth, rowSeparator_);
 
-                    if (i != options_.size() - 1) {
+                    if (i != options_.size() - 1)
+                    {
                         size_t curpos = 0;
-                        for (size_t i = 0; i < maxColumn_ + 1; ++i) {
+                        for (size_t i = 0; i < maxColumn_ + 1; ++i)
+                        {
                             separator[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
                         }

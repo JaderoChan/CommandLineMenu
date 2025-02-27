@@ -30,9 +30,9 @@
 #include <stdexcept>    // runtime_error
 
 #ifdef _WIN32
-#include <conio.h>      // _getch()
+    #include <conio.h>      // _getch()
 #else
-#include <ncurses.h>    // initscr(), cbreak(), noecho() ,getch(), endwin()
+    #include <ncurses.h>    // initscr(), cbreak(), noecho() ,getch(), endwin()
 #endif // _WIN32
 
 class CommandLineMenu
@@ -53,9 +53,9 @@ public:
 
     static int getkey()
     {
-#ifdef _WIN32
+    #ifdef _WIN32
         return ::_getch();
-#else
+    #else
         ::initscr();
         ::cbreak();
         ::noecho();
@@ -64,7 +64,7 @@ public:
 
         ::endwin();
         return ch;
-#endif // _WIN32
+    #endif // _WIN32
     }
 
     /// @brief 在尾部添加一个新选项。
@@ -74,7 +74,6 @@ public:
     void addOption(const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, callbackFunc });
-
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
@@ -88,7 +87,6 @@ public:
     void addOption(const std::string& optionText, ArgFunc callbackFunc, Arg arg, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
-
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
@@ -101,7 +99,6 @@ public:
     void insertOption(size_t index, const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.insert(options_.begin() + index, Option { enableNewPage, optionText, callbackFunc });
-
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
@@ -130,7 +127,6 @@ public:
     void removeAllOption()
     {
         options_.clear();
-
         if (enableAutoAdjustOptionTextWidth_)
             optionTextWidth_ = 0;
     }
@@ -142,7 +138,6 @@ public:
     void setOptionText(size_t index, const std::string& text)
     {
         options_[index].text = text;
-
         if (enableAutoAdjustOptionTextWidth_ && text.size() > optionTextWidth_)
             optionTextWidth_ = text.size();
     }
@@ -280,11 +275,11 @@ public:
     /// @brief 清空控制台。
     void clearConsole()
     {
-#ifdef _WIN32
+    #ifdef _WIN32
         ::system("cls");
-#else
+    #else
         ::system("clear");
-#endif // _WIN32
+    #endif // _WIN32
     }
 
     /// @brief 显示菜单。
@@ -298,45 +293,67 @@ public:
     /// @attention 这个函数将会阻塞主线程，直到按下 Esc 键，或者调用 endReceiveInput() 函数。
     void startReceiveInput()
     {
-        while (!shouldEndReceiveInput_) {
+        while (!shouldEndReceiveInput_)
+        {
             // 清空输入缓冲区。
             std::cin.clear();
 
             int key = getkey();
-
-            if (key == enterKey_) {
+            if (key == enterKey_)
+            {
                 triggerOption(selectedOption_);
                 update_();
-            } else if (key == escKey_) {
+            }
+            else if (key == escKey_)
+            {
                 shouldEndReceiveInput_ = true;
-            } else if (key == directionalControlKey_[0]) {  // 左
-                if (selectedOption_ > 0) {
+            }
+            // 左
+            else if (key == directionalControlKey_[0])
+            {
+                if (selectedOption_ > 0)
+                {
                     selectOption(selectedOption_ - 1);
                     update_();
                 }
-            } else if (key == directionalControlKey_[1]) {  // 上
+            }
+            // 上
+            else if (key == directionalControlKey_[1])
+            {
                 size_t currentRow = selectedOption_ / maxColumn_;
-                if (currentRow > 0) {
+                if (currentRow > 0)
+                {
                     selectOption(selectedOption_ - maxColumn_);
                     update_();
                 }
-            } else if (key == directionalControlKey_[2]) {  // 右
-                if (!options_.empty()) {
-                    if (selectedOption_ < options_.size() - 1) {
+            }
+            // 右
+            else if (key == directionalControlKey_[2])
+            {
+                if (!options_.empty())
+                {
+                    if (selectedOption_ < options_.size() - 1)
+                    {
                         selectOption(selectedOption_ + 1);
                         update_();
                     }
                 }
-            } else if (key == directionalControlKey_[3]) {  // 下
-                if (!options_.empty()) {
+            }
+            // 下
+            else if (key == directionalControlKey_[3])
+            {
+                if (!options_.empty())
+                {
                     size_t currentRow = selectedOption_ / maxColumn_;
                     size_t sumRow = (options_.size() - 1) / maxColumn_ + 1;
 
-                    if (currentRow < sumRow - 1) {
+                    if (currentRow < sumRow - 1)
+                    {
                         size_t expectedPos = selectedOption_ + maxColumn_;
                         expectedPos = expectedPos < options_.size() ? expectedPos : options_.size() - 1;
 
-                        if (expectedPos != selectedOption_) {
+                        if (expectedPos != selectedOption_)
+                        {
                             selectOption(expectedPos);
                             update_();
                         }
@@ -421,12 +438,14 @@ private:
         if (str.size() > width)
             return justifyString(cutoffString(str, width), width, alignment);
 
-        switch (alignment) {
+        switch (alignment)
+        {
             case 0:
                 return str + std::string(width - str.size(), ' ');
             case 1:
                 return std::string(width - str.size(), ' ') + str;
-            case 2: {
+            case 2:
+            {
                 std::string tmp = std::string((width - str.size()) / 2, ' ') + str;
                 tmp += std::string(width - tmp.size(), ' ');
                 return tmp;
@@ -488,7 +507,8 @@ private:
             std::cout << std::string(rowWidth, rowSeparator_) << std::endl;
 
         // 遍历所有选项。
-        for (size_t i = 0; i < options_.size(); ++i) {
+        for (size_t i = 0; i < options_.size(); ++i)
+        {
             std::string text;
 
             // 如果启用了显示选项索引，则获取选项对应的索引文本。
@@ -505,29 +525,34 @@ private:
             std::cout << columnSeparator_;
 
             // 以选项状态对应的颜色输出完整选项文本。
-            if (i == selectedOption_) {
+            if (i == selectedOption_)
                 outputText_(text, highlightForegroundColor_, highlightBackgroundColor_);
-            } else {
+            else
                 outputText_(text, foregroundColor_, backgroundColor_);
-            }
 
             size_t posInRow = i % maxColumn_;
             bool isLastOneInRow = posInRow == maxColumn_ - 1 || i == options_.size() - 1;
             // 如果当前选项位于行尾，则输出一行行分隔符。
-            if (isLastOneInRow) {
+            if (isLastOneInRow)
+            {
                 // 首先输出一个列分隔符作为行的结束（菜单的右边框）。
                 std::cout << columnSeparator_;
 
                 // 如果行分隔符为\0或者选项文本宽度为0，则不输出行分隔符。
-                if (rowSeparator_ == '\0' || optionTextWidth_ == 0) {
+                if (rowSeparator_ == '\0' || optionTextWidth_ == 0)
+                {
                     std::cout << std::endl;
-                } else {
-                    if (posInRow != maxColumn_ - 1) {
+                }
+                else
+                {
+                    if (posInRow != maxColumn_ - 1)
+                    {
                         size_t supplementWidth = (maxColumn_ - posInRow - 1) * (optionTextWidth_ + 1);
                         std::string supplement(supplementWidth, ' ');
 
                         size_t curpos = optionTextWidth_;
-                        for (size_t i = 0; i < maxColumn_ - posInRow - 1; ++i) {
+                        for (size_t i = 0; i < maxColumn_ - posInRow - 1; ++i)
+                        {
                             supplement[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
                         }
@@ -539,9 +564,11 @@ private:
 
                     std::string separator(rowWidth, rowSeparator_);
 
-                    if (i != options_.size() - 1) {
+                    if (i != options_.size() - 1)
+                    {
                         size_t curpos = 0;
-                        for (size_t i = 0; i < maxColumn_ + 1; ++i) {
+                        for (size_t i = 0; i < maxColumn_ + 1; ++i)
+                        {
                             separator[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
                         }

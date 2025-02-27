@@ -11,13 +11,15 @@ int main(int argc, char* argv[])
     menu.setTopText("Welcome to the command line menu test program.");
     menu.setBottomText("Use the WASD keys to navigate, and the Enter key to select an option, or the Esc key to exit.");
 
-    menu.addOption("Function A", []() {
+    menu.addOption("Function A", []()
+    {
         std::cout << "Function A called." << std::endl;
         std::cout << "Press any key to back to the main menu." << std::endl;
         CommandLineMenu::getkey();
     });
 
-    menu.addOption("Function B", []() {
+    menu.addOption("Function B", []()
+    {
         std::cout << "Function B called." << std::endl;
         std::cout << "Press any key to back to the main menu." << std::endl;
         CommandLineMenu::getkey();
@@ -26,20 +28,23 @@ int main(int argc, char* argv[])
     int newOptionIndex = 0;
     using DataType1 = std::pair<int*, CommandLineMenu*>;
     DataType1 data1(&newOptionIndex, &menu);
-    menu.addOption("Add new", [](void* data) {
+    menu.addOption("Add new", [](void* data)
+    {
         auto data_ = static_cast<DataType1*>(data);
 
         data_->second->addOption("Placeholder " + std::to_string((*data_->first)++), nullptr);
     }, &data1, false);
 
-    menu.addOption("Remove last", [](void* data) {
+    menu.addOption("Remove last", [](void* data)
+    {
         auto& menu = *static_cast<CommandLineMenu*>(data);
 
         if (menu.optionCount() > 0)
             menu.removeOption(menu.optionCount() - 1);
     }, &menu, false);
 
-    menu.addOption("Change column", [](void* data) {
+    menu.addOption("Change column", [](void* data)
+    {
         auto& menu = *static_cast<CommandLineMenu*>(data);
 
         std::cout << "Please enter the new column number: ";
@@ -49,7 +54,8 @@ int main(int argc, char* argv[])
         menu.setMaxColumn(newColumn);
     }, &menu);
 
-    menu.addOption("Sub Menu", [](void* data) {
+    menu.addOption("Sub Menu", [](void* data)
+    {
         auto& menu = *static_cast<CommandLineMenu*>(data);
 
         CommandLineMenu submenu;
@@ -69,7 +75,8 @@ int main(int argc, char* argv[])
         submenu.startReceiveInput();
     }, &menu);
 
-    menu.addOption("Exit", [](void* data) {
+    menu.addOption("Exit", [](void* data)
+    {
         auto& menu = *static_cast<CommandLineMenu*>(data);
 
         menu.endReceiveInput();
