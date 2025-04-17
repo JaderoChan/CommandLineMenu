@@ -2,7 +2,7 @@
 
 ## Brief
 
-A simple console interface for quickly making a more user-friendly console application (A menu, select different options and call corresponding functions by user's input).
+A simple console menu interface library for quickly making a selection of a friendly console application.
 
 ## About
 
