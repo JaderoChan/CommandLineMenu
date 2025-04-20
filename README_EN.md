@@ -1,5 +1,7 @@
 # Command Line Menu
 
+**[简体中文](README.md) | English**
+
 ## Brief
 
 A simple console menu interface library for quickly making a selection of a friendly console application.
