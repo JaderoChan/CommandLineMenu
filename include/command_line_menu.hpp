@@ -40,7 +40,8 @@
 #ifdef _WIN32
     #include <conio.h>      // _getch()
 #else
-    #include <ncurses.h>    // initscr(), cbreak(), noecho() ,getch(), endwin()
+    #include <termio.h>
+    #include <unistd.h>
 #endif // _WIN32
 
 class CommandLineMenu
@@ -64,13 +65,18 @@ public:
     #ifdef _WIN32
         return ::_getch();
     #else
-        ::initscr();
-        ::cbreak();
-        ::noecho();
+        struct termios oldAttr, newAttr;
 
-        int ch = ::getch();
+        tcgetattr(STDIN_FILENO, &oldAttr);
 
-        ::endwin();
+        newAttr = oldAttr;
+        newAttr.c_lflag &= ~(ICANON | ECHO);
+
+        tcsetattr(STDIN_FILENO, TCSANOW, &newAttr);
+
+        int ch = getchar();
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldAttr);
+
         return ch;
     #endif // _WIN32
     }
@@ -199,11 +205,11 @@ public:
     /// @attention If the option text width is 0, the alignment is invalid.
     void setOptionTextAlignment(int alignment) { optionTextAlignment_ = alignment; }
 
-    /// @brief Set the enter key, used to trigger the selected option.
-    void setEnterKey(int key) { enterKey_ = key; }
+    /// @brief Set the confirm key, used to trigger the selected option.
+    void setConfirmKey(int key) { confirmKey_ = key; }
 
-    /// @brief Set the esc key, used to return to the main menu or exit the input loop.
-    void setEscKey(int key) { escKey_ = key; }
+    /// @brief Set the exit key, used to return to the main menu or exit the input loop.
+    void setExitKey(int key) { exitKey_ = key; }
 
     /// @brief Set the directional control key, used to select option.
     void setDirectionalControlKey(int left, int up, int right, int down)
@@ -309,12 +315,12 @@ public:
             std::cin.clear();
 
             int key = getkey();
-            if (key == enterKey_)
+            if (key == confirmKey_)
             {
                 triggerOption(selectedOption_);
                 update_();
             }
-            else if (key == escKey_)
+            else if (key == exitKey_)
             {
                 shouldEndReceiveInput_ = true;
             }
@@ -330,10 +336,10 @@ public:
             // Up
             else if (key == directionalControlKey_[1])
             {
-                size_t currentRow = selectedOption_ / maxColumn_;
+                size_t currentRow = selectedOption_ / maxColumn_();
                 if (currentRow > 0)
                 {
-                    selectOption(selectedOption_ - maxColumn_);
+                    selectOption(selectedOption_ - maxColumn_());
                     update_();
                 }
             }
@@ -354,12 +360,12 @@ public:
             {
                 if (!options_.empty())
                 {
-                    size_t currentRow = selectedOption_ / maxColumn_;
-                    size_t sumRow = (options_.size() - 1) / maxColumn_ + 1;
+                    size_t currentRow = selectedOption_ / maxColumn_();
+                    size_t sumRow = (options_.size() - 1) / maxColumn_() + 1;
 
                     if (currentRow < sumRow - 1)
                     {
-                        size_t expectedPos = selectedOption_ + maxColumn_;
+                        size_t expectedPos = selectedOption_ + maxColumn_();
                         expectedPos = expectedPos < options_.size() ? expectedPos : options_.size() - 1;
 
                         if (expectedPos != selectedOption_)
@@ -465,30 +471,30 @@ private:
         }
     }
 
-    bool isVaildColor_(int r, int g, int b) const
+    static bool isVaildColor_(int r, int g, int b)
     {
         return (r >= 0 && r <= 255) && (g >= 0 && g <= 255) && (b >= 0 && b <= 255);
     }
 
     // Reset all console attributes.
-    void resetConsoleAttribute_() { std::cout << "\033[0m"; }
+    static void resetConsoleAttribute_() { std::cout << "\x1b[0m"; }
 
     // Set the console background color of text.
-    void setConsoleBackgroundColor_(int r, int g, int b)
+    static void setConsoleBackgroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
-            std::cout << "\033[48;2;" << r << ";" << g << ";" << b << "m";
+            std::cout << "\x1b[48;2;" << r << ";" << g << ";" << b << "m";
     }
 
     // Set the console foreground color of text.
-    void setConsoleForegroundColor_(int r, int g, int b)
+    static void setConsoleForegroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
-            std::cout << "\033[38;2;" << r << ";" << g << ";" << b << "m";
+            std::cout << "\x1b[38;2;" << r << ";" << g << ";" << b << "m";
     }
 
     // Output the text with specified color.
-    void outputText_(const std::string& text, const Rgb& foregroundColor, const Rgb& backgroundColor)
+    static void outputText_(const std::string& text, const Rgb& foregroundColor, const Rgb& backgroundColor)
     {
         setConsoleForegroundColor_(foregroundColor[0], foregroundColor[1], foregroundColor[2]);
         setConsoleBackgroundColor_(backgroundColor[0], backgroundColor[1], backgroundColor[2]);
@@ -498,11 +504,13 @@ private:
         resetConsoleAttribute_();
     }
 
+    size_t maxColumn_() const { return maxColumn_ < optionCount() ? maxColumn_ : optionCount(); }
+
     // Update the console output.
     void update_()
     {
         // Clear the console and move the cursor to the top left position.
-        std::cout << "\033[3J\033[H";
+        std::cout << "\x1b[3J\x1b[H";
 
         // Output the top text if #topText_ is not empty.
         if (!topText_.empty())
@@ -539,8 +547,8 @@ private:
             else
                 outputText_(text, foregroundColor_, backgroundColor_);
 
-            size_t posInRow = i % maxColumn_;
-            bool isLastOneInRow = posInRow == maxColumn_ - 1 || i == options_.size() - 1;
+            size_t posInRow = i % maxColumn_();
+            bool isLastOneInRow = posInRow == maxColumn_() - 1 || i == options_.size() - 1;
             // If current option is the last one in the row output the row separator.
             if (isLastOneInRow)
             {
@@ -553,13 +561,13 @@ private:
                 }
                 else
                 {
-                    if (posInRow != maxColumn_ - 1)
+                    if (posInRow != maxColumn_() - 1)
                     {
-                        size_t supplementWidth = (maxColumn_ - posInRow - 1) * (optionTextWidth_ + 1);
+                        size_t supplementWidth = (maxColumn_() - posInRow - 1) * (optionTextWidth_ + 1);
                         std::string supplement(supplementWidth, ' ');
 
                         size_t curpos = optionTextWidth_;
-                        for (size_t i = 0; i < maxColumn_ - posInRow - 1; ++i)
+                        for (size_t i = 0; i < maxColumn_() - posInRow - 1; ++i)
                         {
                             supplement[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
@@ -575,7 +583,7 @@ private:
                     if (i != options_.size() - 1)
                     {
                         size_t curpos = 0;
-                        for (size_t i = 0; i < maxColumn_ + 1; ++i)
+                        for (size_t i = 0; i < maxColumn_() + 1; ++i)
                         {
                             separator[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
@@ -612,10 +620,14 @@ private:
     // The value 1 indicates that do right justified.
     // The value 2 indicates that do center justified.
     int optionTextAlignment_                    = 0;
-    // Enter key, used to trigger the option. Default is 0x0D.
-    int enterKey_                               = 0x0D;
-    // Esc key, used to return to the main menu or exit the input loop. Default is 0x1B.
-    int escKey_                                 = 0x1B;
+    // Confirm key, used to trigger the option.
+#ifdef _WIN32
+    int confirmKey_                             = 0x0D;
+#else
+    int confirmKey_                             = 0x0A;
+#endif // _WIN32
+    // Exit key, used to return to the main menu or exit the input loop.
+    int exitKey_                                = 0x1B;
     // Directional control key, used to select option.
     // Left, Up, Right, Down
     std::array<int, 4> directionalControlKey_   = { 'a', 'w', 'd', 's' };
