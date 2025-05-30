@@ -32,7 +32,8 @@
 #ifdef _WIN32
     #include <conio.h>      // _getch()
 #else
-    #include <ncurses.h>    // initscr(), cbreak(), noecho() ,getch(), endwin()
+    #include <termio.h>
+    #include <unistd.h>
 #endif // _WIN32
 
 class CommandLineMenu
@@ -56,13 +57,18 @@ public:
     #ifdef _WIN32
         return ::_getch();
     #else
-        ::initscr();
-        ::cbreak();
-        ::noecho();
+        struct termios oldAttr, newAttr;
 
-        int ch = ::getch();
+        tcgetattr(STDIN_FILENO, &oldAttr);
 
-        ::endwin();
+        newAttr = oldAttr;
+        newAttr.c_lflag &= ~(ICANON | ECHO);
+
+        tcsetattr(STDIN_FILENO, TCSANOW, &newAttr);
+
+        int ch = getchar();
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldAttr);
+
         return ch;
     #endif // _WIN32
     }
@@ -191,11 +197,11 @@ public:
     /// @attention 如果选项文本宽度设置为0，则布局方式无效。
     void setOptionTextAlignment(int alignment) { optionTextAlignment_ = alignment; }
 
-    /// @brief 设置 Enter 键，其用于触发选项。默认为 0x0D 即回车键。
-    void setEnterKey(int key) { enterKey_ = key; }
+    /// @brief 设置确认键，其用于触发选项。
+    void setConfirmKey(int key) { confirmKey_ = key; }
 
-    /// @brief 设置 Esc 键，其用于从选项页面返回菜单页面，以及用于退出输入循环。默认为 0x1B 即Escape键。
-    void setEscKey(int key) { escKey_ = key; }
+    /// @brief 设置退出键，其用于从选项页面返回菜单页面，以及用于退出输入循环。
+    void setExitKey(int key) { exitKey_ = key; }
 
     /// @brief 设置方向导航键。
     void setDirectionalControlKey(int left, int up, int right, int down)
@@ -299,12 +305,12 @@ public:
             std::cin.clear();
 
             int key = getkey();
-            if (key == enterKey_)
+            if (key == confirmKey_)
             {
                 triggerOption(selectedOption_);
                 update_();
             }
-            else if (key == escKey_)
+            else if (key == exitKey_)
             {
                 shouldEndReceiveInput_ = true;
             }
@@ -320,10 +326,10 @@ public:
             // 上
             else if (key == directionalControlKey_[1])
             {
-                size_t currentRow = selectedOption_ / maxColumn_;
+                size_t currentRow = selectedOption_ / maxColumn_();
                 if (currentRow > 0)
                 {
-                    selectOption(selectedOption_ - maxColumn_);
+                    selectOption(selectedOption_ - maxColumn_());
                     update_();
                 }
             }
@@ -344,12 +350,12 @@ public:
             {
                 if (!options_.empty())
                 {
-                    size_t currentRow = selectedOption_ / maxColumn_;
-                    size_t sumRow = (options_.size() - 1) / maxColumn_ + 1;
+                    size_t currentRow = selectedOption_ / maxColumn_();
+                    size_t sumRow = (options_.size() - 1) / maxColumn_() + 1;
 
                     if (currentRow < sumRow - 1)
                     {
-                        size_t expectedPos = selectedOption_ + maxColumn_;
+                        size_t expectedPos = selectedOption_ + maxColumn_();
                         expectedPos = expectedPos < options_.size() ? expectedPos : options_.size() - 1;
 
                         if (expectedPos != selectedOption_)
@@ -455,30 +461,30 @@ private:
         }
     }
 
-    bool isVaildColor_(int r, int g, int b) const
+    static bool isVaildColor_(int r, int g, int b)
     {
         return (r >= 0 && r <= 255) && (g >= 0 && g <= 255) && (b >= 0 && b <= 255);
     }
 
     // 重置所有控制台属性。
-    void resetConsoleAttribute_() { std::cout << "\033[0m"; }
+    static void resetConsoleAttribute_() { std::cout << "\033[0m"; }
 
     // 设置控制台的文本背景色。
-    void setConsoleBackgroundColor_(int r, int g, int b)
+    static void setConsoleBackgroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
             std::cout << "\033[48;2;" << r << ";" << g << ";" << b << "m";
     }
 
     // 设置控制台的文本前景色。
-    void setConsoleForegroundColor_(int r, int g, int b)
+    static void setConsoleForegroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
             std::cout << "\033[38;2;" << r << ";" << g << ";" << b << "m";
     }
 
     // 以指定颜色输出文本至控制台。
-    void outputText_(const std::string& text, const Rgb& foregroundColor, const Rgb& backgroundColor)
+    static void outputText_(const std::string& text, const Rgb& foregroundColor, const Rgb& backgroundColor)
     {
         setConsoleForegroundColor_(foregroundColor[0], foregroundColor[1], foregroundColor[2]);
         setConsoleBackgroundColor_(backgroundColor[0], backgroundColor[1], backgroundColor[2]);
@@ -487,6 +493,8 @@ private:
 
         resetConsoleAttribute_();
     }
+
+    size_t maxColumn_() const { return maxColumn_ < optionCount() ? maxColumn_ : optionCount(); }
 
     // 更新控制台显示。
     void update_()
@@ -498,9 +506,9 @@ private:
         if (!topText_.empty())
             std::cout << topText_ << '\n' << std::endl;
 
-        // 基于 #maxColum_ 和 #optionTextWidth_，计算一行的字符总长度（包含所有列分隔符在内），
+        // 基于 #maxColumn_ 和 #optionTextWidth_，计算一行的字符总长度（包含所有列分隔符在内），
         // 如果 #optionTextWidth_ 为0，则此值无效。
-        size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxColumn_ + 1;
+        size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxColumn_() + 1;
 
         // 如果行分隔符不为\0，则首先输出一行行分隔符（界面顶部的边框）。
         if (rowSeparator_ != '\0' && optionTextWidth_ != 0)
@@ -530,8 +538,8 @@ private:
             else
                 outputText_(text, foregroundColor_, backgroundColor_);
 
-            size_t posInRow = i % maxColumn_;
-            bool isLastOneInRow = posInRow == maxColumn_ - 1 || i == options_.size() - 1;
+            size_t posInRow = i % maxColumn_();
+            bool isLastOneInRow = posInRow == maxColumn_() - 1 || i == options_.size() - 1;
             // 如果当前选项位于行尾，则输出一行行分隔符。
             if (isLastOneInRow)
             {
@@ -545,13 +553,13 @@ private:
                 }
                 else
                 {
-                    if (posInRow != maxColumn_ - 1)
+                    if (posInRow != maxColumn_() - 1)
                     {
-                        size_t supplementWidth = (maxColumn_ - posInRow - 1) * (optionTextWidth_ + 1);
+                        size_t supplementWidth = (maxColumn_() - posInRow - 1) * (optionTextWidth_ + 1);
                         std::string supplement(supplementWidth, ' ');
 
                         size_t curpos = optionTextWidth_;
-                        for (size_t i = 0; i < maxColumn_ - posInRow - 1; ++i)
+                        for (size_t i = 0; i < maxColumn_() - posInRow - 1; ++i)
                         {
                             supplement[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
@@ -567,7 +575,7 @@ private:
                     if (i != options_.size() - 1)
                     {
                         size_t curpos = 0;
-                        for (size_t i = 0; i < maxColumn_ + 1; ++i)
+                        for (size_t i = 0; i < maxColumn_() + 1; ++i)
                         {
                             separator[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
@@ -603,14 +611,18 @@ private:
     // 1代表右对齐。
     // 2代表居中对齐。
     int optionTextAlignment_                    = 0;
-    // Enter 键，其用于触发选项。默认为 0x0D 即回车键。
-    int enterKey_                               = 0x0D;
-    // Esc 键，其用于从选项页面返回菜单页面，以及用于退出输入循环。默认为 0x1B 即Escape键。
-    int escKey_                                 = 0x1B;
+    // 确认键，其用于触发选项。
+#ifdef _WIN32
+    int confirmKey_                             = 0x0D;
+#else
+    int confirmKey_                             = 0x0A;
+#endif // _WIN32
+    // 退出键，其用于从选项页面返回菜单页面，以及用于退出输入循环。
+    int exitKey_                                 = 0x1B;
     // 方向导航键，左上右下。
     std::array<int, 4> directionalControlKey_   = { 'a', 'w', 'd', 's' };
     // 菜单最大列数，用于布局菜单选项。默认为1。
-    // 不可为0，利用函数 setMaxColum() 中设置0时，实际将会设置为1。
+    // 不可为0，利用函数 setmaxColumn_() 中设置0时，实际将会设置为1。
     size_t maxColumn_                           = 1;
     // 选项的文本宽度，用于布局菜单选项。默认为0。
     // 如果为0则表示不对文本进行对齐与布局，并且行分隔符将被禁用。
