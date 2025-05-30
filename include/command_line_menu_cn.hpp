@@ -32,7 +32,7 @@
 #ifdef _WIN32
     #include <conio.h>      // _getch()
 #else
-    #include <termio.h>
+    #include <termios.h>
     #include <unistd.h>
 #endif // _WIN32
 
@@ -63,7 +63,6 @@ public:
 
         newAttr = oldAttr;
         newAttr.c_lflag &= ~(ICANON | ECHO);
-
         tcsetattr(STDIN_FILENO, TCSANOW, &newAttr);
 
         int ch = getchar();
@@ -301,9 +300,6 @@ public:
     {
         while (!shouldEndReceiveInput_)
         {
-            // 清空输入缓冲区。
-            std::cin.clear();
-
             int key = getkey();
             if (key == confirmKey_)
             {

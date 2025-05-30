@@ -50,8 +50,10 @@ int main(int argc, char* argv[])
         std::cout << "Please enter the new column number: ";
         int newColumn = 0;
         std::cin >> newColumn;
-
         menu.setMaxColumn(newColumn);
+
+        // Discard the new line key.
+        CommandLineMenu::getkey();
     }, &menu);
 
     menu.addOption("Sub Menu", [](void* data)
