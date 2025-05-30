@@ -326,10 +326,10 @@ public:
             // 上
             else if (key == directionalControlKey_[1])
             {
-                size_t currentRow = selectedOption_ / maxColumn_();
+                size_t currentRow = selectedOption_ / maxCol_();
                 if (currentRow > 0)
                 {
-                    selectOption(selectedOption_ - maxColumn_());
+                    selectOption(selectedOption_ - maxCol_());
                     update_();
                 }
             }
@@ -350,12 +350,12 @@ public:
             {
                 if (!options_.empty())
                 {
-                    size_t currentRow = selectedOption_ / maxColumn_();
-                    size_t sumRow = (options_.size() - 1) / maxColumn_() + 1;
+                    size_t currentRow = selectedOption_ / maxCol_();
+                    size_t sumRow = (options_.size() - 1) / maxCol_() + 1;
 
                     if (currentRow < sumRow - 1)
                     {
-                        size_t expectedPos = selectedOption_ + maxColumn_();
+                        size_t expectedPos = selectedOption_ + maxCol_();
                         expectedPos = expectedPos < options_.size() ? expectedPos : options_.size() - 1;
 
                         if (expectedPos != selectedOption_)
@@ -494,7 +494,7 @@ private:
         resetConsoleAttribute_();
     }
 
-    size_t maxColumn_() const { return maxColumn_ < optionCount() ? maxColumn_ : optionCount(); }
+    size_t maxCol_() const { return maxColumn_ < optionCount() ? maxColumn_ : optionCount(); }
 
     // 更新控制台显示。
     void update_()
@@ -508,7 +508,7 @@ private:
 
         // 基于 #maxColumn_ 和 #optionTextWidth_，计算一行的字符总长度（包含所有列分隔符在内），
         // 如果 #optionTextWidth_ 为0，则此值无效。
-        size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxColumn_() + 1;
+        size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxCol_() + 1;
 
         // 如果行分隔符不为\0，则首先输出一行行分隔符（界面顶部的边框）。
         if (rowSeparator_ != '\0' && optionTextWidth_ != 0)
@@ -538,8 +538,8 @@ private:
             else
                 outputText_(text, foregroundColor_, backgroundColor_);
 
-            size_t posInRow = i % maxColumn_();
-            bool isLastOneInRow = posInRow == maxColumn_() - 1 || i == options_.size() - 1;
+            size_t posInRow = i % maxCol_();
+            bool isLastOneInRow = posInRow == maxCol_() - 1 || i == options_.size() - 1;
             // 如果当前选项位于行尾，则输出一行行分隔符。
             if (isLastOneInRow)
             {
@@ -553,13 +553,13 @@ private:
                 }
                 else
                 {
-                    if (posInRow != maxColumn_() - 1)
+                    if (posInRow != maxCol_() - 1)
                     {
-                        size_t supplementWidth = (maxColumn_() - posInRow - 1) * (optionTextWidth_ + 1);
+                        size_t supplementWidth = (maxCol_() - posInRow - 1) * (optionTextWidth_ + 1);
                         std::string supplement(supplementWidth, ' ');
 
                         size_t curpos = optionTextWidth_;
-                        for (size_t i = 0; i < maxColumn_() - posInRow - 1; ++i)
+                        for (size_t i = 0; i < maxCol_() - posInRow - 1; ++i)
                         {
                             supplement[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
@@ -575,7 +575,7 @@ private:
                     if (i != options_.size() - 1)
                     {
                         size_t curpos = 0;
-                        for (size_t i = 0; i < maxColumn_() + 1; ++i)
+                        for (size_t i = 0; i < maxCol_() + 1; ++i)
                         {
                             separator[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
@@ -622,7 +622,7 @@ private:
     // 方向导航键，左上右下。
     std::array<int, 4> directionalControlKey_   = { 'a', 'w', 'd', 's' };
     // 菜单最大列数，用于布局菜单选项。默认为1。
-    // 不可为0，利用函数 setmaxColumn_() 中设置0时，实际将会设置为1。
+    // 不可为0，利用函数 setmaxCol_() 中设置0时，实际将会设置为1。
     size_t maxColumn_                           = 1;
     // 选项的文本宽度，用于布局菜单选项。默认为0。
     // 如果为0则表示不对文本进行对齐与布局，并且行分隔符将被禁用。

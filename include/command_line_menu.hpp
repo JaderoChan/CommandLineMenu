@@ -336,10 +336,10 @@ public:
             // Up
             else if (key == directionalControlKey_[1])
             {
-                size_t currentRow = selectedOption_ / maxColumn_();
+                size_t currentRow = selectedOption_ / maxCol_();
                 if (currentRow > 0)
                 {
-                    selectOption(selectedOption_ - maxColumn_());
+                    selectOption(selectedOption_ - maxCol_());
                     update_();
                 }
             }
@@ -360,12 +360,12 @@ public:
             {
                 if (!options_.empty())
                 {
-                    size_t currentRow = selectedOption_ / maxColumn_();
-                    size_t sumRow = (options_.size() - 1) / maxColumn_() + 1;
+                    size_t currentRow = selectedOption_ / maxCol_();
+                    size_t sumRow = (options_.size() - 1) / maxCol_() + 1;
 
                     if (currentRow < sumRow - 1)
                     {
-                        size_t expectedPos = selectedOption_ + maxColumn_();
+                        size_t expectedPos = selectedOption_ + maxCol_();
                         expectedPos = expectedPos < options_.size() ? expectedPos : options_.size() - 1;
 
                         if (expectedPos != selectedOption_)
@@ -504,7 +504,7 @@ private:
         resetConsoleAttribute_();
     }
 
-    size_t maxColumn_() const { return maxColumn_ < optionCount() ? maxColumn_ : optionCount(); }
+    size_t maxCol_() const { return maxColumn_ < optionCount() ? maxColumn_ : optionCount(); }
 
     // Update the console output.
     void update_()
@@ -518,7 +518,7 @@ private:
 
         // Calculate the width of each row, based on the max column and option text width.
         // And attention, that conatins all column separator.
-        size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxColumn_ + 1;
+        size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxCol_() + 1;
 
         // Output the row separator at top first, if #rowSeparator_ is not '\0'.
         if (rowSeparator_ != '\0' && optionTextWidth_ != 0)
@@ -547,8 +547,8 @@ private:
             else
                 outputText_(text, foregroundColor_, backgroundColor_);
 
-            size_t posInRow = i % maxColumn_();
-            bool isLastOneInRow = posInRow == maxColumn_() - 1 || i == options_.size() - 1;
+            size_t posInRow = i % maxCol_();
+            bool isLastOneInRow = posInRow == maxCol_() - 1 || i == options_.size() - 1;
             // If current option is the last one in the row output the row separator.
             if (isLastOneInRow)
             {
@@ -561,13 +561,13 @@ private:
                 }
                 else
                 {
-                    if (posInRow != maxColumn_() - 1)
+                    if (posInRow != maxCol_() - 1)
                     {
-                        size_t supplementWidth = (maxColumn_() - posInRow - 1) * (optionTextWidth_ + 1);
+                        size_t supplementWidth = (maxCol_() - posInRow - 1) * (optionTextWidth_ + 1);
                         std::string supplement(supplementWidth, ' ');
 
                         size_t curpos = optionTextWidth_;
-                        for (size_t i = 0; i < maxColumn_() - posInRow - 1; ++i)
+                        for (size_t i = 0; i < maxCol_() - posInRow - 1; ++i)
                         {
                             supplement[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
@@ -583,7 +583,7 @@ private:
                     if (i != options_.size() - 1)
                     {
                         size_t curpos = 0;
-                        for (size_t i = 0; i < maxColumn_() + 1; ++i)
+                        for (size_t i = 0; i < maxCol_() + 1; ++i)
                         {
                             separator[curpos] = columnSeparator_;
                             curpos += optionTextWidth_ + 1;
