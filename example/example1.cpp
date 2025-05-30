@@ -52,8 +52,10 @@ int main(int argc, char* argv[])
         std::cin >> newColumn;
         menu.setMaxColumn(newColumn);
 
-        // Discard the new line key.
+    #ifndef _WIN32
+        // Discard the LF character.
         CommandLineMenu::getkey();
+    #endif // !_WIN32
     }, &menu);
 
     menu.addOption("Sub Menu", [](void* data)
