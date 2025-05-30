@@ -1,3 +1,5 @@
+#include <limits>
+
 #include <command_line_menu.hpp>
 
 int main(int argc, char* argv[])
@@ -50,6 +52,14 @@ int main(int argc, char* argv[])
         std::cout << "Please enter the new column number: ";
         int newColumn = 0;
         std::cin >> newColumn;
+
+        if (std::cin.fail())
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            return;
+        }
+
         menu.setMaxColumn(newColumn);
 
     #ifndef _WIN32
