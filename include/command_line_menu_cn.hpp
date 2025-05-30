@@ -463,20 +463,20 @@ private:
     }
 
     // 重置所有控制台属性。
-    static void resetConsoleAttribute_() { std::cout << "\033[0m"; }
+    static void resetConsoleAttribute_() { std::cout << "\x1b[0m"; }
 
     // 设置控制台的文本背景色。
     static void setConsoleBackgroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
-            std::cout << "\033[48;2;" << r << ";" << g << ";" << b << "m";
+            std::cout << "\x1b[48;2;" << r << ";" << g << ";" << b << "m";
     }
 
     // 设置控制台的文本前景色。
     static void setConsoleForegroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
-            std::cout << "\033[38;2;" << r << ";" << g << ";" << b << "m";
+            std::cout << "\x1b[38;2;" << r << ";" << g << ";" << b << "m";
     }
 
     // 以指定颜色输出文本至控制台。
@@ -496,7 +496,7 @@ private:
     void update_()
     {
         // 清空控制台，并将光标移至左上角。
-        std::cout << "\033[3J\033[H";
+        std::cout << "\x1b[3J\x1b[H";
 
         // 如果 #topText_ 不为空，则输出至控制台。
         if (!topText_.empty())
