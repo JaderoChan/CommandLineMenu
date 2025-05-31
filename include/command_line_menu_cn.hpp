@@ -21,6 +21,7 @@
 #define COMMAND_LINE_MENU_HPP
 
 #ifdef __APPLE__
+    #include <TargetConditionals.h>
     #if TARGET_OS_OSX
         #define COMMAND_LINE_MENU_USE_24BIT_COLOR
     #endif // TARGET_OS_OSX
@@ -541,8 +542,13 @@ private:
     // 以指定颜色输出文本至控制台。
     static void outputText_(const std::string& text, const Rgb& foregroundColor, const Rgb& backgroundColor)
     {
+    #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
         setConsoleForegroundColor_(foregroundColor[0], foregroundColor[1], foregroundColor[2]);
         setConsoleBackgroundColor_(backgroundColor[0], backgroundColor[1], backgroundColor[2]);
+    #else
+        setConsoleForegroundColor_(foregroundColor);
+        setConsoleBackgroundColor_(backgroundColor);
+    #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
         std::cout << text;
 
