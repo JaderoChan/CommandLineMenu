@@ -20,14 +20,23 @@
 #ifndef COMMAND_LINE_MENU_HPP
 #define COMMAND_LINE_MENU_HPP
 
+#ifdef __APPLE__
+    #if TARGET_OS_OSX
+        #define COMMAND_LINE_MENU_USE_24BIT_COLOR
+    #endif // TARGET_OS_OSX
+#endif // __APPLE__
+
 #include <cstddef>      // size_t
 #include <cstdlib>      // system()
 #include <string>       // string
-#include <array>        // array
 #include <vector>       // vector
 #include <atomic>       // atomic
 #include <iostream>     // cout, endl, flush
 #include <stdexcept>    // runtime_error
+
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
+    #include <array>        // array
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
 #ifdef _WIN32
     #include <conio.h>      // _getch()
@@ -39,7 +48,23 @@
 class CommandLineMenu
 {
 public:
-    using Rgb           = std::array<int, 3>;
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
+    using Rgb = std::array<int, 3>;
+#else
+    enum Rgb
+    {
+        RGB_NONE    = 0,
+        RGB_BLACK   = 30,
+        RGB_RED     = 31,
+        RGB_GREEN   = 32,
+        RGB_YELLOW  = 33,
+        RGB_BLUE    = 34,
+        RGB_MAGENTA = 35,
+        RGB_CYAN    = 36,
+        RGB_WHITE   = 37
+    };
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
+
     using VoidFunc      = void (*)();
     using Arg           = void*;
     using ArgFunc       = void (*)(Arg);
@@ -235,20 +260,36 @@ public:
     void selectOption(size_t index) { setHighlightedOption(index); }
 
     /// @brief 设置非高光选项的文本背景颜色。默认由控制台决定。
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     /// @note 当r，g，b值无效时（例如[-1, -1, -1])，将会恢复为控制台默认的颜色。
     void setBackgroundColor(int r, int g, int b) { backgroundColor_ = { r, g, b }; }
+#else
+    void setBackgroundColor(Rgb color) { backgroundColor_ = color; }
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
     /// @brief 设置非高光选项的文本前景颜色。默认由控制台决定。
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     /// @note 当r，g，b值无效时（例如[-1, -1, -1])，将会恢复为控制台默认的颜色。
     void setForegroundColor(int r, int g, int b) { foregroundColor_ = { r, g, b }; }
+#else
+    void setForegroundColor(Rgb color) { foregroundColor_ = color; }
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
     /// @brief 设置高光选项的文本背景颜色。默认由控制台决定。
-    /// @note 当r，g，b值无效时（例如[-1, -1, -1])，将会恢复为控制台默认的颜色。
-    void setHighlightBackgroundColor(int r, int g, int b) { highlightBackgroundColor_ = { r, g, b }; }
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
+/// @note 当r，g，b值无效时（例如[-1, -1, -1])，将会恢复为控制台默认的颜色。
+void setHighlightBackgroundColor(int r, int g, int b) { highlightBackgroundColor_ = { r, g, b }; }
+#else
+void setHighlightBackgroundColor(Rgb color) { highlightBackgroundColor_ = color; }
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
-    /// @brief 设置高光选项的文本前景颜色。默认为绿色，rgb[0, 255, 0]。
+/// @brief 设置高光选项的文本前景颜色。默认为绿色，rgb[0, 255, 0]。
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     /// @note 当r，g，b值无效时（例如[-1, -1, -1])，将会恢复为控制台默认的颜色。
     void setHighlightForegroundColor(int r, int g, int b) { highlightForegroundColor_ = { r, g, b }; }
+#else
+    void setHighlightForegroundColor(Rgb color) { highlightForegroundColor_ = color; }
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
     /// @brief 设置菜单顶部的文本。
     void setTopText(const std::string& text) { topText_ = text; }
@@ -457,27 +498,45 @@ private:
         }
     }
 
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     static bool isVaildColor_(int r, int g, int b)
     {
         return (r >= 0 && r <= 255) && (g >= 0 && g <= 255) && (b >= 0 && b <= 255);
     }
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
     // 重置所有控制台属性。
     static void resetConsoleAttribute_() { std::cout << "\x1b[0m"; }
 
     // 设置控制台的文本背景色。
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     static void setConsoleBackgroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
             std::cout << "\x1b[48;2;" << r << ";" << g << ";" << b << "m";
     }
+#else
+    static void setConsoleBackgroundColor_(Rgb color)
+    {
+        if (color != RGB_NONE)
+            std::cout << "\x1b[48;5;" << color << "m";
+    }
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
     // 设置控制台的文本前景色。
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     static void setConsoleForegroundColor_(int r, int g, int b)
     {
         if (isVaildColor_(r, g, b))
             std::cout << "\x1b[38;2;" << r << ";" << g << ";" << b << "m";
     }
+#else
+    static void setConsoleForegroundColor_(Rgb color)
+    {
+        if (color != RGB_NONE)
+            std::cout << "\x1b[38;5;" << color << "m";
+    }
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
     // 以指定颜色输出文本至控制台。
     static void outputText_(const std::string& text, const Rgb& foregroundColor, const Rgb& backgroundColor)
@@ -625,10 +684,17 @@ private:
     size_t optionTextWidth_                     = 0;
     // 当前选中（高光）的项。
     size_t selectedOption_                      = 0;
+#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     Rgb backgroundColor_                        = { -1, -1, -1 };
     Rgb foregroundColor_                        = { -1, -1, -1 };
     Rgb highlightBackgroundColor_               = { -1, -1, -1 };
     Rgb highlightForegroundColor_               = { 0, 255, 0 };
+#else
+    Rgb backgroundColor_                        = RGB_NONE;
+    Rgb foregroundColor_                        = RGB_NONE;
+    Rgb highlightBackgroundColor_               = RGB_NONE;
+    Rgb highlightForegroundColor_               = RGB_GREEN;
+#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
     std::string topText_;
     std::string bottomText_;
     std::vector<Option> options_;
