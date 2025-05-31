@@ -8,3 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 add_executable(example1 example1.cpp)
+
+if (APPLE)
+    target_compile_definitions(example1 PUBLIC COMMAND_LINE_MENU_USE_24BIT_COLOR)
+endif()
