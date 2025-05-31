@@ -9,6 +9,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 add_executable(example1 example1.cpp)
 
-if (!APPLE)
+if (NOT APPLE)
+    message(STATUS "Enabling 24-bit color support for example1")
     target_compile_definitions(example1 PUBLIC COMMAND_LINE_MENU_USE_24BIT_COLOR)
 endif()
