@@ -28,13 +28,6 @@
 #ifndef COMMAND_LINE_MENU_HPP
 #define COMMAND_LINE_MENU_HPP
 
-#ifdef __APPLE__
-    #include <TargetConditionals.h>
-    #if TARGET_OS_OSX
-        #define COMMAND_LINE_MENU_USE_24BIT_COLOR
-    #endif // TARGET_OS_OSX
-#endif // __APPLE__
-
 #include <cstddef>      // size_t
 #include <cstdlib>      // system()
 #include <string>       // string
