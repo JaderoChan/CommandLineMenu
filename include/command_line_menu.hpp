@@ -30,15 +30,12 @@
 
 #include <cstddef>      // size_t
 #include <cstdlib>      // system()
+#include <array>        // array
+#include <atomic>       // atomic
+#include <stdexcept>    // runtime_error
+#include <iostream>     // cout, endl
 #include <string>       // string
 #include <vector>       // vector
-#include <atomic>       // atomic
-#include <iostream>     // cout, endl, flush
-#include <stdexcept>    // runtime_error
-
-#ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
-    #include <array>        // array
-#endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
 #ifdef _WIN32
     #include <conio.h>      // _getch()
