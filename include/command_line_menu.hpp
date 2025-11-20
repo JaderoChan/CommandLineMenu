@@ -563,7 +563,7 @@ private:
         // Clear the console and move the cursor to the top left position.
         std::cout << "\x1b[3J\x1b[H";
 
-        // Output the top text if #topText_ is not empty.
+        // Output the top text if topText_ is not empty.
         if (!topText_.empty())
             std::cout << topText_ << '\n' << std::endl;
 
@@ -571,7 +571,7 @@ private:
         // And attention, that conatins all column separator.
         size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxCol_() + 1;
 
-        // Output the row separator at top first, if #rowSeparator_ is not '\0'.
+        // Output the row separator at top first, if rowSeparator_ is not '\0'.
         if (rowSeparator_ != '\0' && optionTextWidth_ != 0)
             std::cout << std::string(rowWidth, rowSeparator_) << std::endl;
 
@@ -579,14 +579,14 @@ private:
         {
             std::string text;
 
-            // Get the index text of option if #enableShowIndex_ is true.
+            // Get the index text of option if enableShowIndex_ is true.
             if (enableShowIndex_)
                 text += "[" + std::to_string(i) + "] ";
 
-            // Get the full option text (with index if #enableShowIndex_ is true).
+            // Get the full option text (with index if enableShowIndex_ is true).
             text += options_[i].text;
 
-            // Adjust the option text width and justify the text if the #optionTextWidth_ is not 0.
+            // Adjust the option text width and justify the text if the optionTextWidth_ is not 0.
             if (optionTextWidth_ != 0)
                  text = justifyString_(text, optionTextWidth_, optionTextAlignment_);
 
@@ -646,7 +646,7 @@ private:
             }
         }
 
-        // Output the bottom text if #bottomText_ is not empty.
+        // Output the bottom text if bottomText_ is not empty.
         if (!bottomText_.empty())
             std::cout << '\n' << bottomText_ << std::endl;
 

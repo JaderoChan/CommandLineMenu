@@ -553,12 +553,12 @@ private:
         // 清空控制台，并将光标移至左上角。
         std::cout << "\x1b[3J\x1b[H";
 
-        // 如果 #topText_ 不为空，则输出至控制台。
+        // 如果 topText_ 不为空，则输出至控制台。
         if (!topText_.empty())
             std::cout << topText_ << '\n' << std::endl;
 
-        // 基于 #maxColumn_ 和 #optionTextWidth_，计算一行的字符总长度（包含所有列分隔符在内），
-        // 如果 #optionTextWidth_ 为0，则此值无效。
+        // 基于 maxColumn_ 和 optionTextWidth_，计算一行的字符总长度（包含所有列分隔符在内），
+        // 如果 optionTextWidth_ 为0，则此值无效。
         size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxCol_() + 1;
 
         // 如果行分隔符不为\0，则首先输出一行行分隔符（界面顶部的边框）。
@@ -638,7 +638,7 @@ private:
             }
         }
 
-        // 如果 #bottomText_ 不为空，则输出至控制台。
+        // 如果 bottomText_ 不为空，则输出至控制台。
         if (!bottomText_.empty())
             std::cout << '\n' << bottomText_ << std::endl;
 
