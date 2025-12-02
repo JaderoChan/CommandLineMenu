@@ -201,14 +201,14 @@ public:
     void setColumnSeparator(char separator) { columnSeparator_ = separator; }
 
     /// @brief 设置行分隔符。默认为：-。
-    /// @attention 如果其等于 \0 则不会显示任何行分隔符。
-    /// @attention 如果选项文本宽度设置为0（此时选项文本将不被对齐，紧凑排布），则行分隔符无效（等同于其值为\0时情况）。
+    /// @attention - 如果其等于 \0 则不会显示任何行分隔符。
+    /// @attention - 如果选项文本宽度设置为0（此时选项文本将不被对齐，紧凑排布），则行分隔符无效（等同于其值为\0时情况）。
     void setRowSeparator(char separator) { rowSeparator_ = separator; }
 
     /// @brief 设置选项文本的布局方式。默认为0。
-    /// @note 0代表左对齐。
-    /// @note 1代表右对齐。
-    /// @note 2代表居中对齐。
+    /// @note - 0代表左对齐。
+    /// @note - 1代表右对齐。
+    /// @note - 2代表居中对齐。
     /// @attention 如果选项文本宽度设置为0，则布局方式无效。
     void setOptionTextAlignment(int alignment) { optionTextAlignment_ = alignment; }
 
@@ -232,8 +232,8 @@ public:
     void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
 
     /// @brief 设置选项的文本宽度，用于布局菜单选项。默认为0。
-    /// @note 如果选项文本大于此值则会将溢出部分更改为 ... 以示省略，否则将按照对齐方式将文本前后添置空格。
-    /// @note 如果为0则表示不对文本进行对齐与布局，并且行分隔符将被禁用。
+    /// @note - 如果选项文本大于此值则会将溢出部分更改为 ... 以示省略，否则将按照对齐方式将文本前后添置空格。
+    /// @note - 如果为0则表示不对文本进行对齐与布局，并且行分隔符将被禁用。
     void setOptionTextWidth(size_t width) { optionTextWidth_ = width; }
 
     /// @brief 设置当前选中（高光）的项。

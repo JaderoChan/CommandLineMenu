@@ -209,14 +209,14 @@ public:
     void setColumnSeparator(char separator) { columnSeparator_ = separator; }
 
     /// @brief Set the row separator. Default is '-'.
-    /// @attention The value '\0' indicating no separator.
-    /// @attention If the option text width is 0, the row separator will not be output.
+    /// @attention - The value '\0' indicating no separator.
+    /// @attention - If the option text width is 0, the row separator will not be output.
     void setRowSeparator(char separator) { rowSeparator_ = separator; }
 
     /// @brief Set the alignment of the option text. Default value is 0.
-    /// @note The value 0 indicates that do left justified.
-    /// @note The value 1 indicates that do right justified.
-    /// @note The value 2 indicates that do center justified.
+    /// @note - The value 0 indicates that do left justified.
+    /// @note - The value 1 indicates that do right justified.
+    /// @note - The value 2 indicates that do center justified.
     /// @attention If the option text width is 0, the alignment is invalid.
     void setOptionTextAlignment(int alignment) { optionTextAlignment_ = alignment; }
 
@@ -240,7 +240,10 @@ public:
     void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
 
     /// @brief Set the justified width of the option text. Default value is 0.
-    /// @note The value 0 indicates that do not justify the text, and the row separator will not be output.
+    /// @note - If the option text is greater than this value,
+    /// the overflow part will be changed to ... To indicate omission,
+    /// otherwise Spaces will be added before and after the text according to the alignment.
+    /// @note - The value 0 indicates that do not justify the text, and the row separator will not be output.
     void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
 
     /// @brief Set the current selected option (highlight option).
