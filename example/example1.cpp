@@ -10,20 +10,20 @@ int main(int argc, char* argv[])
     menu.setEnableAutoAdjustOptionTextWidth(true);
     menu.setOptionTextAlignment(2);
     menu.setMaxColumn(3);
-    menu.setTopText("Welcome to the command line menu test program.");
-    menu.setBottomText("Use the WASD keys to navigate, and the Enter key to select an option, or the Esc key to exit.");
+    menu.setTopText("Welcome to the command line menu test program");
+    menu.setBottomText("Use the WASD keys to navigate, and the Enter key to select an option, or the Esc key to exit");
 
     menu.addOption("Function A", []()
     {
-        std::cout << "Function A called." << std::endl;
-        std::cout << "Press any key to back to the main menu." << std::endl;
+        std::cout << "Function A called" << std::endl;
+        std::cout << "Press any key to back to the main menu" << std::endl;
         CommandLineMenu::getkey();
     });
 
     menu.addOption("Function B", []()
     {
-        std::cout << "Function B called." << std::endl;
-        std::cout << "Press any key to back to the main menu." << std::endl;
+        std::cout << "Function B called" << std::endl;
+        std::cout << "Press any key to back to the main menu" << std::endl;
         CommandLineMenu::getkey();
     });
 
