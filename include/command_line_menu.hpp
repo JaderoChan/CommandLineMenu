@@ -1,7 +1,7 @@
 // The "Command Line Menu" library, in c++.
 //
-// Webs: https://github.com/JaderoChan/CommandLineMenu
-// You can contact me by email: c_dl_cn@outlook.com
+// Repository: https://github.com/JaderoChan/CommandLineMenu
+// Contact email: c_dl_cn@outlook.com
 
 // MIT License
 //
@@ -38,7 +38,7 @@
 #include <vector>       // vector
 
 #ifdef _WIN32
-    #include <conio.h>      // _getch()
+    #include <conio.h>  // _getch()
 #else
     #include <termios.h>
     #include <unistd.h>

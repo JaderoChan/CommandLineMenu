@@ -1,7 +1,7 @@
 // Command Line Menu 库
 //
-// 网址链接：https://github.com/JaderoChan/CommandLineMenu
-// 你可以通过邮箱联系我：c_dl_cn@outlook.com
+// 项目仓库：https://github.com/JaderoChan/CommandLineMenu
+// 联系邮箱：c_dl_cn@outlook.com
 
 // MIT License
 //
@@ -30,7 +30,7 @@
 #include <vector>       // vector
 
 #ifdef _WIN32
-    #include <conio.h>      // _getch()
+    #include <conio.h>  // _getch()
 #else
     #include <termios.h>
     #include <unistd.h>
