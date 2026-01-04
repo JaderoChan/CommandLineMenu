@@ -96,10 +96,10 @@ public:
     #endif // _WIN32
     }
 
-    /// @brief Add a new option to the last position.
-    /// @param optionText       The text of the option.
-    /// @param callbackFunc     The callback function when the option is triggered.
-    /// @param enableNewPage    Whether go to the new page when the option be triggered.
+    /// @brief Add a new option to the end of the menu.
+    /// @param optionText       The text displayed for the option.
+    /// @param callbackFunc     The callback function to execute when the option is selected.
+    /// @param enableNewPage    Whether to clear the console before executing the callback.
     void addOption(const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, callbackFunc });
@@ -108,11 +108,11 @@ public:
     }
 
     /// @overload
-    /// @brief Add a new option to the last position.
-    /// @param optionText       The text of the option.
-    /// @param callbackFunc     The callback function when the option is triggered.
-    /// @param arg              The argument of the callback function.
-    /// @param enableNewPage    Whether go to the new page when the option be triggered.
+    /// @brief Add a new option to the end of the menu.
+    /// @param optionText       The text displayed for the option.
+    /// @param callbackFunc     The callback function with an argument.
+    /// @param arg              The argument to pass to the callback function.
+    /// @param enableNewPage    Whether to clear the console before executing the callback.
     void addOption(const std::string& optionText, ArgFunc callbackFunc, Arg arg, bool enableNewPage = true)
     {
         options_.push_back(Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
@@ -120,11 +120,11 @@ public:
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
 
-    /// @brief Insert a new option to the specified position.
-    /// @param index            The position to insert the option.
-    /// @param optionText       The text of the option.
-    /// @param callbackFunc     The callback function when the option is triggered.
-    /// @param enableNewPage    Whether go to the new page when the option be triggered.
+    /// @brief Insert a new option at the specified position.
+    /// @param index            The position to insert the option (0-based).
+    /// @param optionText       The text displayed for the option.
+    /// @param callbackFunc     The callback function to execute when the option is selected.
+    /// @param enableNewPage    Whether to clear the console before executing the callback.
     void insertOption(size_t index, const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
     {
         options_.insert(options_.begin() + index, Option { enableNewPage, optionText, callbackFunc });
@@ -133,12 +133,12 @@ public:
     }
 
     /// @overload
-    /// @brief Insert a new option to the specified position.
-    /// @param index            The position to insert the option.
-    /// @param optionText       The text of the option.
-    /// @param callbackFunc     The callback function when the option is triggered.
-    /// @param arg              The argument of the callback function.
-    /// @param enableNewPage    Whether go to the new page when the option be triggered.
+    /// @brief Insert a new option at the specified position.
+    /// @param index            The position to insert the option (0-based).
+    /// @param optionText       The text displayed for the option.
+    /// @param callbackFunc     The callback function with an argument.
+    /// @param arg              The argument to pass to the callback function.
+    /// @param enableNewPage    Whether to clear the console before executing the callback.
     void insertOption(size_t index, const std::string& optionText, ArgFunc callbackFunc, Arg arg,
                       bool enableNewPage = true)
     {
@@ -160,10 +160,10 @@ public:
             optionTextWidth_ = 0;
     }
 
-    /// @brief Set the whether go to the new page when the option be triggered.
+    /// @brief Enable or disable console clearing for the specified option.
     void setOptionEnableNewPage(size_t index, bool enable) { options_[index].enableNewPage = enable; }
 
-    /// @brief Set the text of specified option.
+    /// @brief Set the display text for the specified option.
     void setOptionText(size_t index, const std::string& text)
     {
         options_[index].text = text;
@@ -171,22 +171,22 @@ public:
             optionTextWidth_ = text.size();
     }
 
-    /// @brief Set the callback function of specified option.
+    /// @brief Set the callback function for the specified option.
     void setOptionCallback(size_t index, VoidFunc callbackFunc)
     {
         options_[index].callback = CallbackFunc(callbackFunc);
     }
 
     /// @overload
-    /// @brief Set the callback function and argument of specified option.
+    /// @brief Set the callback function and argument for the specified option.
     void setOptionCallback(size_t index, ArgFunc callbackFunc, Arg arg)
     {
         options_[index].callback = CallbackFunc(callbackFunc, arg);
     }
 
-    /// @brief Set the argument of specified option.
-    /// @attention Only available when the option has argument.
-    /// @throw Throw runtime_error exception if the option has no callback function with argument.
+    /// @brief Set the argument for the specified option's callback function.
+    /// @attention Only available for options with argument-based callbacks.
+    /// @throw Throws std::runtime_error if the option does not have an argument-based callback.
     void setOptionCallbackArg(size_t index, Arg arg)
     {
         if (options_[index].callback.isArgFunc)
@@ -195,38 +195,38 @@ public:
             throw std::runtime_error("Specified option has no callback function with argument.");
     }
 
-    /// @brief Get the count of options.
+    /// @brief Get the number of options in the menu.
     size_t optionCount() const { return options_.size(); }
 
-    /// @brief Set whether to show the index of each option.
+    /// @brief Enable or disable index display for each option.
     void setEnableShowIndex(bool enable) { enableShowIndex_ = enable; }
 
-    /// @brief Set whether to adjust the option text width based on the the longest option text automatically.
-    /// @attention This function should be called before addOption() or insertOption().
+    /// @brief Enable or disable automatic adjustment of option text width.
+    /// @attention Call this function before addOption() or insertOption() for best results.
     void setEnableAutoAdjustOptionTextWidth(bool enable) { enableAutoAdjustOptionTextWidth_ = enable; }
 
-    /// @brief Set the column separator. Default is '|'.
+    /// @brief Set the column separator character. Default is '|'.
     void setColumnSeparator(char separator) { columnSeparator_ = separator; }
 
-    /// @brief Set the row separator. Default is '-'.
-    /// @attention - The value '\0' indicating no separator.
-    /// @attention - If the option text width is 0, the row separator will not be output.
+    /// @brief Set the row separator character. Default is '-'.
+    /// @attention - Use '\0' to disable row separators.
+    /// @attention - Row separators are not displayed if option text width is 0.
     void setRowSeparator(char separator) { rowSeparator_ = separator; }
 
-    /// @brief Set the alignment of the option text. Default value is 0.
-    /// @note - The value 0 indicates that do left justified.
-    /// @note - The value 1 indicates that do right justified.
-    /// @note - The value 2 indicates that do center justified.
-    /// @attention If the option text width is 0, the alignment is invalid.
+    /// @brief Set the text alignment for option display. Default is 0 (left-aligned).
+    /// @note - 0: Left-justified
+    /// @note - 1: Right-justified
+    /// @note - 2: Center-justified
+    /// @attention Alignment has no effect if option text width is 0.
     void setOptionTextAlignment(int alignment) { optionTextAlignment_ = alignment; }
 
-    /// @brief Set the confirm key, used to trigger the selected option.
+    /// @brief Set the key to confirm/select the highlighted option.
     void setConfirmKey(int key) { confirmKey_ = key; }
 
-    /// @brief Set the exit key, used to return to the main menu or exit the input loop.
+    /// @brief Set the key to exit the menu or return to parent menu.
     void setExitKey(int key) { exitKey_ = key; }
 
-    /// @brief Set the directional control key, used to select option.
+    /// @brief Set the directional keys for navigation.
     void setDirectionalControlKey(int left, int up, int right, int down)
     {
         directionalControlKey_ = { left, up, right, down };
@@ -235,19 +235,18 @@ public:
     /// @overload
     void setDirectionalControlKey(const std::array<int, 4>& keys) { directionalControlKey_ = keys; }
 
-    /// @brief Set the max column of option menu, used to align the output. Default is 1.
-    /// @attention Set value 0 has the same effect as setting 1.
+    /// @brief Set the maximum number of columns for menu layout. Default is 1.
+    /// @attention A value of 0 has the same effect as 1.
     void setMaxColumn(size_t maxColumn) { maxColumn_ = maxColumn == 0 ? 1 : maxColumn; }
 
-    /// @brief Set the justified width of the option text. Default value is 0.
-    /// @note - If the option text is greater than this value,
-    /// the overflow part will be changed to ... To indicate omission,
-    /// otherwise Spaces will be added before and after the text according to the alignment.
-    /// @note - The value 0 indicates that do not justify the text, and the row separator will not be output.
+    /// @brief Set the fixed width for option text display. Default is 0 (auto-width).
+    /// @note - If option text exceeds this width, it will be truncated with "...".
+    /// @note - If option text is shorter, spaces will be added based on alignment.
+    /// @note - A value of 0 disables text justification and row separators.
     void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
 
-    /// @brief Set the current selected option (highlight option).
-    /// @attention If the given index is out of range, the last option of the menu will be selected.
+    /// @brief Set the currently highlighted option.
+    /// @attention If the index is out of range, the last option will be selected.
     void setHighlightedOption(size_t index)
     {
         if (index >= options_.size())
@@ -256,54 +255,50 @@ public:
             selectedOption_ = index;
     }
 
-    /// @brief Select the specified option, the same as setHighlightedOption().
-    /// @sa setHighlightOption()
+    /// @brief Select the specified option (alias for setHighlightedOption).
+    /// @sa setHighlightedOption()
     void selectOption(size_t index) { setHighlightedOption(index); }
 
-    /// @brief Set the background color of the option text. The default is determined by the console.
+    /// @brief Set the background color for option text. Default uses console default.
 #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
-    /// @note When r, g, b values are invalid (for example, [-1, -1, -1]),
-    // the default colors of the console will be restored.
+    /// @note Invalid RGB values (e.g., [-1, -1, -1]) restore console default colors.
     void setBackgroundColor(int r, int g, int b) { backgroundColor_ = { r, g, b }; }
 #else
     void setBackgroundColor(Rgb color) { backgroundColor_ = color; }
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
-    /// @brief Set the foreground color of the option text. The default is determined by the console.
+    /// @brief Set the foreground color for option text. Default uses console default.
 #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
-    /// @note When r, g, b values are invalid (for example, [-1, -1, -1]),
-    // the default colors of the console will be restored.
+    /// @note Invalid RGB values (e.g., [-1, -1, -1]) restore console default colors.
     void setForegroundColor(int r, int g, int b) { foregroundColor_ = { r, g, b }; }
 #else
     void setForegroundColor(Rgb color) { foregroundColor_ = color; }
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
-    /// @brief Set the highlight background color of option selected. The default is determined by the console.
+    /// @brief Set the background color for the highlighted option. Default uses console default.
 #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
-    /// @note When r, g, b values are invalid (for example, [-1, -1, -1]),
-    // the default colors of the console will be restored.
+    /// @note Invalid RGB values (e.g., [-1, -1, -1]) restore console default colors.
     void setHighlightBackgroundColor(int r, int g, int b) { highlightBackgroundColor_ = { r, g, b }; }
 #else
     void setHighlightBackgroundColor(Rgb color) { highlightBackgroundColor_ = color; }
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
-    /// @brief Set the highlight foreground color of option selected. The default is green, rgb[0, 255, 0].
+    /// @brief Set the foreground color for the highlighted option. Default is green.
 #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
-    /// @note When r, g, b values are invalid (for example, [-1, -1, -1]),
-    // the default colors of the console will be restored.
+    /// @note Invalid RGB values (e.g., [-1, -1, -1]) restore console default colors.
     void setHighlightForegroundColor(int r, int g, int b) { highlightForegroundColor_ = { r, g, b }; }
 #else
     void setHighlightForegroundColor(Rgb color) { highlightForegroundColor_ = color; }
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
-    /// @brief Set the top text of the option list.
+    /// @brief Set the text to display above the menu.
     void setTopText(const std::string& text) { topText_ = text; }
 
-    /// @brief Set the bottom text of the option list.
+    /// @brief Set the text to display below the menu.
     void setBottomText(const std::string& text) { bottomText_ = text; }
 
     /// @brief Select and trigger the specified option.
-    /// @attention Not throw exception even if the index is out of range or the option's callback function is null.
+    /// @attention No exception is thrown even if index is out of range or callback is null.
     void triggerOption(size_t index)
     {
         if (index >= options_.size())
@@ -322,7 +317,7 @@ public:
         clearConsole();
     }
 
-    /// @brief Clear the console.
+    /// @brief Clear the console screen.
     void clearConsole()
     {
     #ifdef _WIN32
@@ -332,15 +327,15 @@ public:
     #endif // _WIN32
     }
 
-    /// @brief Show the menu.
+    /// @brief Display the menu.
     void show()
     {
         clearConsole();
         update_();
     }
 
-    /// @brief Start to receive input from console.
-    /// @attention This function will block the current thread, and will not return until the input loop is exited.
+    /// @brief Start receiving keyboard input for menu navigation.
+    /// @attention This function blocks the current thread until the input loop is exited.
     void startReceiveInput()
     {
         while (!shouldEndReceiveInput_)
@@ -512,7 +507,7 @@ private:
     // Reset all console attributes.
     static void resetConsoleAttribute_() { std::cout << "\x1b[0m"; }
 
-    // Set the console background color of text.
+    // Set the console background color for text.
 #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     static void setConsoleBackgroundColor_(int r, int g, int b)
     {
@@ -527,7 +522,7 @@ private:
     }
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
-    // Set the console foreground color of text.
+    // Set the console foreground color for text.
 #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     static void setConsoleForegroundColor_(int r, int g, int b)
     {
@@ -542,7 +537,7 @@ private:
     }
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
-    // Output the text with specified color.
+    // Output text with specified colors.
     static void outputText_(const std::string& text, const Rgb& foregroundColor, const Rgb& backgroundColor)
     {
     #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
@@ -560,21 +555,21 @@ private:
 
     size_t maxCol_() const { return maxColumn_ < optionCount() ? maxColumn_ : optionCount(); }
 
-    // Update the console output.
+    // Update the console display.
     void update_()
     {
-        // Clear the console and move the cursor to the top left position.
+        // Clear the console and move the cursor to the top-left corner.
         std::cout << "\x1b[3J\x1b[H";
 
-        // Output the top text if topText_ is not empty.
+        // Output the top text if not empty.
         if (!topText_.empty())
             std::cout << topText_ << '\n' << std::endl;
 
-        // Calculate the width of each row, based on the max column and option text width.
-        // And attention, that conatins all column separator.
+        // Calculate row width based on max columns and option text width.
+        // Includes column separators.
         size_t rowWidth = options_.empty() ? 0 : (optionTextWidth_ + 1) * maxCol_() + 1;
 
-        // Output the row separator at top first, if rowSeparator_ is not '\0'.
+        // Output the top row separator if enabled.
         if (rowSeparator_ != '\0' && optionTextWidth_ != 0)
             std::cout << std::string(rowWidth, rowSeparator_) << std::endl;
 
@@ -582,20 +577,20 @@ private:
         {
             std::string text;
 
-            // Get the index text of option if enableShowIndex_ is true.
+            // Add index prefix if enabled.
             if (enableShowIndex_)
                 text += "[" + std::to_string(i) + "] ";
 
-            // Get the full option text (with index if enableShowIndex_ is true).
+            // Append the option text.
             text += options_[i].text;
 
-            // Adjust the option text width and justify the text if the optionTextWidth_ is not 0.
+            // Justify text if optionTextWidth_ is set.
             if (optionTextWidth_ != 0)
                  text = justifyString_(text, optionTextWidth_, optionTextAlignment_);
 
             std::cout << columnSeparator_;
 
-            // Output the full option text with specified color.
+            // Output option text with appropriate colors.
             if (i == selectedOption_)
                 outputText_(text, highlightForegroundColor_, highlightBackgroundColor_);
             else
@@ -603,10 +598,10 @@ private:
 
             size_t posInRow = i % maxCol_();
             bool isLastOneInRow = posInRow == maxCol_() - 1 || i == options_.size() - 1;
-            // If current option is the last one in the row output the row separator.
+            // Handle end-of-row formatting.
             if (isLastOneInRow)
             {
-                // First, output the column separator for the last one in the row or the last one in the option list.
+                // Output the final column separator.
                 std::cout << columnSeparator_;
 
                 if (rowSeparator_ == '\0' || optionTextWidth_ == 0)
@@ -615,6 +610,7 @@ private:
                 }
                 else
                 {
+                    // Fill missing columns in incomplete rows.
                     if (posInRow != maxCol_() - 1)
                     {
                         size_t supplementWidth = (maxCol_() - posInRow - 1) * (optionTextWidth_ + 1);
@@ -632,6 +628,7 @@ private:
 
                     std::cout << std::endl;
 
+                    // Generate row separator with column separator markers.
                     std::string separator(rowWidth, rowSeparator_);
 
                     if (i != options_.size() - 1)
@@ -649,49 +646,45 @@ private:
             }
         }
 
-        // Output the bottom text if bottomText_ is not empty.
+        // Output the bottom text if not empty.
         if (!bottomText_.empty())
             std::cout << '\n' << bottomText_ << std::endl;
 
         std::cout << std::endl << std::flush;
     }
 
-    // The value of reserve space to prevent the index of option out of range
-    // when adjust the option text width automatically.
+    // Reserve space to prevent index text from being truncated during auto-width adjustment.
     static const size_t reserveSpace = 8;
 
-    // Whether to show the index of each option.
+    // Whether to show option indices.
     bool enableShowIndex_                       = false;
-    // Whether to adjust the option text width based on the the longest option text automatically.
+    // Whether to auto-adjust option text width based on longest option.
     bool enableAutoAdjustOptionTextWidth_       = true;
-    // Separator of each column. Default is '|'.
+    // Column separator character. Default is '|'.
     char columnSeparator_                       = '|';
-    // Separator of each row. Default is '-'.
-    // If it is '\0' indicating no separator.
+    // Row separator character. Default is '-'.
+    // Use '\0' to disable.
     char rowSeparator_                          = '-';
-    // The alignment of option text, used to align the output. Default value is 0.
-    // The value 0 indicates that do left justified.
-    // The value 1 indicates that do right justified.
-    // The value 2 indicates that do center justified.
+    // Text alignment for option display. Default is 0 (left-aligned).
+    // 0: left-justified, 1: right-justified, 2: center-justified.
     int optionTextAlignment_                    = 0;
-    // Confirm key, used to trigger the option.
+    // Key to confirm selection.
 #ifdef _WIN32
-    int confirmKey_                             = 0x0D;
+    int confirmKey_                             = 0x0D;  // Enter key
 #else
-    int confirmKey_                             = 0x0A;
+    int confirmKey_                             = 0x0A;  // Enter key
 #endif // _WIN32
-    // Exit key, used to return to the main menu or exit the input loop.
-    int exitKey_                                = 0x1B;
-    // Directional control key, used to select option.
-    // Left, Up, Right, Down
+    // Key to exit menu.
+    int exitKey_                                = 0x1B;  // Escape key
+    // Directional control keys: Left, Up, Right, Down.
     std::array<int, 4> directionalControlKey_   = { 'a', 'w', 'd', 's' };
-    // The max column of option list, used to align the output.
-    // Default value is 1, and value 0 is same to value 1.
+    // Maximum number of columns for layout.
+    // Default is 1. Value 0 is treated as 1.
     size_t maxColumn_                           = 1;
-    // The justified width of option text, used to align the output. Default value is 0.
-    // The value 0 indicates that do not justify the text, and the row separator will not be output.
+    // Fixed width for option text display. Default is 0 (auto-width).
+    // 0 disables text justification and row separators.
     size_t optionTextWidth_                     = 0;
-    // Current selected option index.
+    // Currently selected option index.
     size_t selectedOption_                      = 0;
 #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     Rgb backgroundColor_                        = { -1, -1, -1 };
@@ -707,7 +700,7 @@ private:
     std::string topText_;
     std::string bottomText_;
     std::vector<Option> options_;
-    // Whether to end the input loop.
+    // Flag to control input loop termination.
     std::atomic<bool> shouldEndReceiveInput_;
 };
 
