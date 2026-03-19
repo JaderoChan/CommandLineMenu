@@ -243,7 +243,7 @@ public:
     /// @note - If option text exceeds this width, it will be truncated with "...".
     /// @note - If option text is shorter, spaces will be added based on alignment.
     /// @note - A value of 0 disables text justification and row separators.
-    void setOptionTextWidth(ssize_t width) { optionTextWidth_ = width; }
+    void setOptionTextWidth(size_t width) { optionTextWidth_ = width; }
 
     /// @brief Set the currently highlighted option.
     /// @attention If the index is out of range, the last option will be selected.
