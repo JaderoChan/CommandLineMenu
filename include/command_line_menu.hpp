@@ -100,9 +100,10 @@ public:
     /// @param optionText       The text displayed for the option.
     /// @param callbackFunc     The callback function to execute when the option is selected.
     /// @param enableNewPage    Whether to clear the console before executing the callback.
-    void addOption(const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
+    void addOption(const std::string& optionText, VoidFunc callbackFunc,
+        bool enableNewPage = true, bool waitKeyAfterEnd = true)
     {
-        options_.push_back(Option { enableNewPage, optionText, callbackFunc });
+        options_.push_back(Option { enableNewPage, waitKeyAfterEnd, optionText, callbackFunc });
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
@@ -113,9 +114,10 @@ public:
     /// @param callbackFunc     The callback function with an argument.
     /// @param arg              The argument to pass to the callback function.
     /// @param enableNewPage    Whether to clear the console before executing the callback.
-    void addOption(const std::string& optionText, ArgFunc callbackFunc, Arg arg, bool enableNewPage = true)
+    void addOption(const std::string& optionText, ArgFunc callbackFunc, Arg arg,
+        bool enableNewPage = true, bool waitKeyAfterEnd = true)
     {
-        options_.push_back(Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
+        options_.push_back(Option { enableNewPage, waitKeyAfterEnd, optionText, CallbackFunc(callbackFunc, arg) });
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
@@ -125,9 +127,10 @@ public:
     /// @param optionText       The text displayed for the option.
     /// @param callbackFunc     The callback function to execute when the option is selected.
     /// @param enableNewPage    Whether to clear the console before executing the callback.
-    void insertOption(size_t index, const std::string& optionText, VoidFunc callbackFunc, bool enableNewPage = true)
+    void insertOption(size_t index, const std::string& optionText, VoidFunc callbackFunc,
+        bool enableNewPage = true, bool waitKeyAfterEnd = true)
     {
-        options_.insert(options_.begin() + index, Option { enableNewPage, optionText, callbackFunc });
+        options_.insert(options_.begin() + index, Option { enableNewPage, waitKeyAfterEnd, optionText, callbackFunc });
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
     }
@@ -140,10 +143,10 @@ public:
     /// @param arg              The argument to pass to the callback function.
     /// @param enableNewPage    Whether to clear the console before executing the callback.
     void insertOption(size_t index, const std::string& optionText, ArgFunc callbackFunc, Arg arg,
-                      bool enableNewPage = true)
+          bool enableNewPage = true, bool waitKeyAfterEnd = true)
     {
         options_.insert(options_.begin() + index,
-                        Option { enableNewPage, optionText, CallbackFunc(callbackFunc, arg) });
+            Option { enableNewPage, waitKeyAfterEnd, optionText, CallbackFunc(callbackFunc, arg) });
 
         if (enableAutoAdjustOptionTextWidth_ && optionText.size() + reserveSpace > optionTextWidth_)
             optionTextWidth_ = optionText.size() + reserveSpace;
@@ -162,6 +165,9 @@ public:
 
     /// @brief Enable or disable console clearing for the specified option.
     void setOptionEnableNewPage(size_t index, bool enable) { options_[index].enableNewPage = enable; }
+
+    /// @brief Enable or disable whether to wait for any key input to return to the main menu when the function ends.
+    void setOptionWaitKeyAfterEnd(size_t index, bool enable) { options_[index].waitKeyAfterEnd = enable; }
 
     /// @brief Set the display text for the specified option.
     void setOptionText(size_t index, const std::string& text)
@@ -313,6 +319,8 @@ public:
             clearConsole();
 
         options_[selectedOption_].callback.execute();
+        if (options_[selectedOption_].waitKeyAfterEnd)
+            getkey();
 
         clearConsole();
     }
@@ -463,6 +471,7 @@ private:
     struct Option
     {
         bool enableNewPage;
+        bool waitKeyAfterEnd;
         std::string text;
         CallbackFunc callback;
     };
