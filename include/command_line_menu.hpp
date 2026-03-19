@@ -50,17 +50,32 @@ public:
 #ifdef COMMAND_LINE_MENU_USE_24BIT_COLOR
     using Rgb = std::array<int, 3>;
 #else
-    enum Rgb
+    /**
+     * @brief ANSI 256 color.
+     * @note 0-15: Base 16 color. 16-231: 6x6x6 RGB. 232-255: Gray step.
+     */
+    using Rgb = int;
+
+    enum Color16
     {
-        RGB_NONE    = 0,
-        RGB_BLACK   = 30,
-        RGB_RED     = 31,
-        RGB_GREEN   = 32,
-        RGB_YELLOW  = 33,
-        RGB_BLUE    = 34,
-        RGB_MAGENTA = 35,
-        RGB_CYAN    = 36,
-        RGB_WHITE   = 37
+        COLOR_NONE = -1,
+        COLOR_BLACK = 0,
+        COLOR_RED,
+        COLOR_GREEN,
+        COLOR_YELLOW,
+        COLOR_BLUE,
+        COLOR_MAGENTA,
+        COLOR_CYAN,
+        COLOR_WHITE,
+        COLOR_GRAY = COLOR_WHITE,
+        COLOR_LIGHT_BLACK,
+        COLOR_LIGHT_RED,
+        COLOR_LIGHT_GREEN,
+        COLOR_LIGHT_YELLOW,
+        COLOR_LIGHT_BLUE,
+        COLOR_LIGHT_MAGENTA,
+        COLOR_LIGHT_CYAN,
+        COLOR_LIGHT_WHITE
     };
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
@@ -511,6 +526,11 @@ private:
     {
         return (r >= 0 && r <= 255) && (g >= 0 && g <= 255) && (b >= 0 && b <= 255);
     }
+#else
+    static bool isValidColor(int color)
+    {
+        return color >= 0 && color <= 255;
+    }
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
 
     // Reset all console attributes.
@@ -526,7 +546,7 @@ private:
 #else
     static void setConsoleBackgroundColor_(Rgb color)
     {
-        if (color != RGB_NONE)
+        if (color != COLOR_NONE && isValidColor(color))
             std::cout << "\x1b[48;5;" << color << "m";
     }
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
@@ -541,7 +561,7 @@ private:
 #else
     static void setConsoleForegroundColor_(Rgb color)
     {
-        if (color != RGB_NONE)
+        if (color != COLOR_NONE && isValidColor(color))
             std::cout << "\x1b[38;5;" << color << "m";
     }
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
@@ -701,10 +721,10 @@ private:
     Rgb highlightBackgroundColor_               = { -1, -1, -1 };
     Rgb highlightForegroundColor_               = { 0, 255, 0 };
 #else
-    Rgb backgroundColor_                        = RGB_NONE;
-    Rgb foregroundColor_                        = RGB_NONE;
-    Rgb highlightBackgroundColor_               = RGB_NONE;
-    Rgb highlightForegroundColor_               = RGB_GREEN;
+    Rgb backgroundColor_                        = COLOR_NONE;
+    Rgb foregroundColor_                        = COLOR_NONE;
+    Rgb highlightBackgroundColor_               = COLOR_NONE;
+    Rgb highlightForegroundColor_               = COLOR_GREEN;
 #endif // COMMAND_LINE_MENU_USE_24BIT_COLOR
     std::string topText_;
     std::string bottomText_;
