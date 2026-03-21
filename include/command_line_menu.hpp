@@ -111,6 +111,15 @@ public:
     #endif // _WIN32
     }
 
+    /// @brief Get the number of options in the menu.
+    size_t getOptionCount() const { return options_.size(); }
+
+    std::string getOptionText(size_t index) const { return options_.at(index).text; }
+
+    std::string getTopText() const { return topText_; }
+
+    std::string getBottomText() const { return bottomText_; }
+
     /// @brief Add a new option to the end of the menu.
     /// @param optionText       The text displayed for the option.
     /// @param callbackFunc     The callback function to execute when the option is selected.
@@ -215,9 +224,6 @@ public:
         else
             throw std::runtime_error("Specified option has no callback function with argument.");
     }
-
-    /// @brief Get the number of options in the menu.
-    size_t optionCount() const { return options_.size(); }
 
     /// @brief Enable or disable index display for each option.
     void setEnableShowIndex(bool enable) { enableShowIndex_ = enable; }
@@ -582,7 +588,7 @@ private:
         resetConsoleAttribute_();
     }
 
-    size_t maxCol_() const { return maxColumn_ < optionCount() ? maxColumn_ : optionCount(); }
+    size_t maxCol_() const { return maxColumn_ < getOptionCount() ? maxColumn_ : getOptionCount(); }
 
     // Update the console display.
     void update_()
